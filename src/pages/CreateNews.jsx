@@ -87,6 +87,8 @@ const NewsArticleForm = () => {
   const [tagSearchQuery, setTagSearchQuery] = useState("");
   const tagInputRef = React.useRef(null);
   const [showTagDropdown, setShowTagDropdown] = useState(false);
+  const [showPublishWarning, setShowPublishWarning] = useState(false);
+
       // Add this inside the component
     const location = useLocation();
     const navigate = useNavigate();
@@ -1493,7 +1495,12 @@ const handleBackgroundPublish = async (e) => {
                     <button
                       type="button"
                       disabled={isLoading}
-                      onClick={(e) => handleSubmit(e, "PUBLISHED")}
+                      // onClick={(e) => handleSubmit(e, "PUBLISHED")}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        // Only show warning if status is PUBLISHED
+                        setShowPublishWarning(true);
+                      }}
                       className="px-8 py-3 bg-gradient-to-r from-gray-600 to-gray-500 text-white rounded-lg text-sm font-semibold hover:from-gray-500 hover:to-gray-400 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all shadow-lg"
                     >
                       {isLoading ? (
@@ -2999,6 +3006,46 @@ const handleBackgroundPublish = async (e) => {
                   No drafts found.
                 </p>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+      {showPublishWarning && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl border border-gray-100">
+            <div className="flex items-center justify-center mb-4 text-amber-500">
+              <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            
+            <h3 className="text-lg font-bold text-gray-900 text-center mb-2">
+              Not Recommended Method
+            </h3>
+            
+            <p className="text-gray-600 text-center text-sm mb-6">
+              This is not the recommended way to publish news. Use <strong>New Background Publish</strong> to publish news. Use this way only when background publish news is not working.
+            </p>
+
+            <div className="flex flex-col gap-3">
+              {/* RED BUTTON: FORCED ACTION */}
+              <button
+                onClick={(e) => {
+                  setShowPublishWarning(false);
+                  handleSubmit(e, "PUBLISHED");
+                }}
+                className="w-full py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors shadow-md"
+              >
+                Publish Anyway with this method
+              </button>
+              
+              {/* LIGHT GREEN BUTTON: SAFE ACTION */}
+              <button
+                onClick={() => setShowPublishWarning(false)}
+                className="w-full py-3 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 border border-green-200 transition-colors"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>
