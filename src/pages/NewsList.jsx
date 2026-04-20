@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FileText, X, Clock, Loader2  } from "lucide-react";
 import {fetchMyNewsPosts,fetchDistributedNews,publishNewsArticle,fetchNewsDetail,fetchMasterCategories,fetchPortals,
-  fetchPortalCategories,editNews,deleteDistributedNews,updateDistributedNews,fetchDistributedNewsDetail} from "../../server";
+  fetchPortalCategories,editNews,deleteDistributedNews,updateDistributedNews,fetchDistributedNewsDetail, backgroundPublishNews} from "../../server";
 import constant from "../../Constant";
 import { toast } from "react-toastify";
 import MasterFilter from "../components/filters/MasterFilter";
@@ -151,6 +151,26 @@ const [loadingDistributed, setLoadingDistributed] = useState({});
       setPublishingId(null);
     }
   };
+
+  const handleBackgroundRetry = async (item) => {
+  try {
+    setPublishingId(item.id);
+    const res = await backgroundPublishNews(item.id);
+
+    if (res?.data?.status) {
+      toast.success("News queued successfully! Publishing in background.");
+    } else {
+      toast.error(res?.data?.message || "Failed to queue background publish.");
+    }
+  } catch (err) {
+    console.error("Background retry error:", err);
+    toast.error("Failed to queue background publish.");
+  } finally {
+    setPublishingId(null);
+  }
+};
+
+
  useEffect(() => {
   if (!expandedRow) return; 
   if (dateFilter !== "today") return; // ✅ If dateFilter is NOT "today", stop here (no refresh)
@@ -595,16 +615,9 @@ const handleDeleteDistributedNews = async (distId, newsPostId) => {
                             
                           </td>
                           
-                          <td
-                            className="px-4 py-2 text-sm text-center  space-x-3 "
-                            onClick={(e) => {
-                              e.stopPropagation(); // prevent row expand/collapse
-                              if (!publishingId) handleRetryPublish(item);
-                            }}
-                          >
-
+                          <td className="px-4 py-2 text-sm text-center">
                             {publishingId === item.id ? (
-                              <div className="flex items-center gap-2 text-gray-600 text-sm">
+                              <div className="flex items-center justify-center gap-2 text-gray-600 text-sm">
                                 <svg
                                   className="w-4 h-4 animate-spin text-gray-600"
                                   viewBox="0 0 24 24"
@@ -626,12 +639,29 @@ const handleDeleteDistributedNews = async (distId, newsPostId) => {
                                 <span>Publishing...</span>
                               </div>
                             ) : (
-                              <button
-                                className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-                                title="Retry Publish"
-                              >
-                                Retry
-                              </button>
+                              <div className="flex items-center justify-center gap-3">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (!publishingId) handleRetryPublish(item);
+                                  }}
+                                  className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                                  title="Retry Publish (normal)"
+                                >
+                                  Retry
+                                </button>
+                                <span className="text-gray-300">|</span>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (!publishingId) handleBackgroundRetry(item);
+                                  }}
+                                  className="text-sm text-emerald-600 hover:text-emerald-800 font-medium"
+                                  title="Retry Publish in Background"
+                                >
+                                  BG Retry
+                                </button>
+                              </div>
                             )}
                           </td>
                         </tr>

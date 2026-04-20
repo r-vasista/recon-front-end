@@ -539,4 +539,9 @@ export async function fetchAssignPortal(userId) {
   return axiosInstance.get(`/account/user/portals/${userId}/`)
 }
 
+export const backgroundPublishNews = (newsId) => {
+  return axiosInstance.post(`api/back-ground/publish/news/${newsId}/`);
+};
+
 export default axiosInstance;
+

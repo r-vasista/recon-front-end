@@ -634,7 +634,7 @@ const buildDraftDiff = (oldData, newData) => {
     );
 
     return await new Promise((resolve) => {
-      outCanvas.toBlob((blob) => resolve(blob), "image/jpeg", 0.95);
+      outCanvas.toBlob((blob) => resolve(blob), "image/jpeg");
     });
   };
 
@@ -1250,6 +1250,146 @@ if (isDistributedEdit && distributedNewsId) {
   }
 };
 
+const handleBackgroundPublish = async (e) => {
+  e.preventDefault();
+
+  if (!formData.meta_title.trim()) {
+    toast.warning("Meta title is required.");
+    return;
+  }
+
+  if (!formData.image && !imagePreview) {
+    toast.warning("Please upload a post image before submitting.");
+    return;
+  }
+
+  if (formData.shortDesc.length > 160) {
+    toast.warning("Short description must be less than 160 characters.");
+    return;
+  }
+
+  setIsLoading(true);
+
+  try {
+    // First create/publish the article normally to get the news ID
+    const formDataToSend = new FormData();
+    formDataToSend.append("title", formData.title || formData.headline);
+    formDataToSend.append("short_description", formData.shortDesc);
+    formDataToSend.append("content", formData.longDesc);
+    formDataToSend.append("post_image", formData.image);
+    formDataToSend.append("meta_title", formData.meta_title);
+    formDataToSend.append("slug", formData.slug);
+    formDataToSend.append("status", "PUBLISHED");
+    formDataToSend.append("counter", formData.counter);
+    formDataToSend.append("order", formData.order);
+    formDataToSend.append(
+      "cross_portal_category_id",
+      mappedPortals[0]?.mapping_found
+        ? mappedPortals[0]?.portalCategoryId
+        : mappedPortals[0]?.id
+    );
+
+    if (formData.tags && formData.tags.length > 0) {
+      const formattedTags = formData.tags
+        .map((tag) => {
+          const tagData = availableTags.find((t) => t.id === tag);
+          const tagName = tagData ? tagData.name : tag;
+          return `#${tagName}`;
+        })
+        .join(", ");
+      formDataToSend.append("post_tag", formattedTags);
+    }
+
+    formDataToSend.append("latest_news", formData.latestNews ? "true" : "false");
+    formDataToSend.append("Head_Lines", formData.headlines ? "true" : "false");
+    formDataToSend.append("articles", formData.articles ? "true" : "false");
+    formDataToSend.append("trending", formData.trending ? "true" : "false");
+    formDataToSend.append("BreakingNews", formData.breakingNews ? "true" : "false");
+    formDataToSend.append("upcoming_event", formData.upcomingEvents ? "true" : "false");
+
+    if (formData.eventStartDate) {
+      formDataToSend.append(
+        "Event_date",
+        new Date(formData.eventStartDate).toISOString().split("T")[0]
+      );
+    }
+    if (formData.eventEndDate) {
+      formDataToSend.append(
+        "Event_end_date",
+        new Date(formData.eventEndDate).toISOString().split("T")[0]
+      );
+    }
+    if (formData.scheduleDate) {
+      formDataToSend.append("schedule_date", formData.scheduleDate);
+    }
+
+    const newlyAddedCategories = mappedPortals
+      .filter((p) => p.portalId === 0 && p.selected && p.portalCategoryId)
+      .map((p) => Number(p.id));
+
+    const excludedCategories = mappedPortals
+      .filter((p) => !p.selected && p.portalId !== 0 && p.portalCategoryId)
+      .map((p) => Number(p.portalCategoryId));
+
+    formDataToSend.append(
+      "portal_category_ids",
+      JSON.stringify(newlyAddedCategories)
+    );
+    formDataToSend.append(
+      "exclude_portal_categories",
+      JSON.stringify(excludedCategories)
+    );
+
+    let response;
+    try {
+      response = await createNewsArticle(formDataToSend);
+    }catch (createErr) {
+      // createErr IS the response data directly (due to axios interceptor)
+      const errorData = typeof createErr === "object" ? createErr : { message: createErr };
+
+      if (errorData?.message && typeof errorData.message === "object") {
+        Object.entries(errorData.message).forEach(([field, errors]) => {
+          const messages = Array.isArray(errors) ? errors.join(", ") : errors;
+          toast.error(`${field}: ${messages}`);
+        });
+      } else {
+        toast.error(errorData?.message || "Failed to create article.");
+      }
+      setIsLoading(false);
+      return;
+    }
+    const createdArticle = response.data.data;
+
+    // Now call background publish API
+    const bgResponse = await fetch(
+    `${constant.appBaseUrl}/api/back-ground/publish/news/${createdArticle.id}/`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${JSON.parse(localStorage.getItem("auth_user"))?.token || ""}`,
+        },
+      }
+    );
+
+    const bgData = await bgResponse.json();
+
+    if (bgData?.status) {
+      toast.success("News queued successfully! Publishing in background.");
+      resetForm();
+      await loadAssignedCategories();
+    } else {
+      toast.error(bgData?.message || "Failed to queue background publish.");
+    }
+  } catch (err) {
+    console.error("Background publish error:", err);
+    toast.error("Failed to queue background publish.");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+
+
   const [editorKey, setEditorKey] = useState(Date.now());
   const resetForm = () => {
      setIsPublished(false);
@@ -1338,7 +1478,7 @@ if (isDistributedEdit && distributedNewsId) {
                   <span>Reset</span>
                 </button>
                 <div className="flex space-x-2">
-                  <button
+                <button
                     type="button"
                     disabled={isLoading}
                     onClick={(e) => handleSubmit(e, "DRAFT")}
@@ -1348,43 +1488,71 @@ if (isDistributedEdit && distributedNewsId) {
                     Save as Draft
                   </button>
 
-                   <button
-                type="submit"
-                disabled={isLoading}
-                onClick={(e) => handleSubmit(e, "PUBLISHED")}
-                className="px-8 py-3 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-lg text-sm font-semibold hover:from-gray-800 hover:to-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all shadow-lg"
-              >
-                {isLoading ? (
-                  <>
-                    <svg
-                      className="animate-spin -ml-1 mr-2 h-5 w-5 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
+                  {/* Publish Article (normal) */}
+                  {!distId && (
+                    <button
+                      type="button"
+                      disabled={isLoading}
+                      onClick={(e) => handleSubmit(e, "PUBLISHED")}
+                      className="px-8 py-3 bg-gradient-to-r from-gray-600 to-gray-500 text-white rounded-lg text-sm font-semibold hover:from-gray-500 hover:to-gray-400 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all shadow-lg"
                     >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      />
-                    </svg>
-                    {distId  ? "Updating..." : "Publishing..."}
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-5 h-5 mr-2" />
-                    {distId  ? "Update & Publish" : "Publish Article"}
-                  </>
-                )}
-              </button>
+                      {isLoading ? (
+                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                      ) : (
+                        <>
+                          <Save className="w-5 h-5 mr-2" />
+                          Publish Article
+                        </>
+                      )}
+                    </button>
+                  )}
+
+                  {/* Background Publish (primary CTA) */}
+                  {!distId && (
+                    <button
+                      type="button"
+                      disabled={isLoading}
+                      onClick={handleBackgroundPublish}
+                      className="px-8 py-3 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-lg text-sm font-semibold hover:from-gray-800 hover:to-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all shadow-lg"
+                    >
+                      {isLoading ? (
+                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                      ) : (
+                        <>
+                          <RefreshCw className="w-5 h-5 mr-2" />
+                          Background Publish
+                        </>
+                      )}
+                    </button>
+                  )}
+
+                  {/* Distributed edit CTA */}
+                  {distId && (
+                    <button
+                      type="submit"
+                      disabled={isLoading}
+                      onClick={(e) => handleSubmit(e, "PUBLISHED")}
+                      className="px-8 py-3 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-lg text-sm font-semibold hover:from-gray-800 hover:to-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all shadow-lg"
+                    >
+                      {isLoading ? (
+                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                      ) : (
+                        <>
+                          <Save className="w-5 h-5 mr-2" />
+                          Update & Publish
+                        </>
+                      )}
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -2705,65 +2873,92 @@ if (isDistributedEdit && distributedNewsId) {
 
             {/* Submit Actions - Updated button text */}
             <div className="flex justify-end space-x-3 pt-6 border-t-2 border-gray-200">
-              <button
-                type="button"
-                onClick={resetForm}
-                className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-all"
-              >
-                Reset Form
-              </button>
-              
-              {/* Only show Draft button if NOT editing distributed news */}
-              {!isDistributedEdit && (
-                <button
-                  type="button"
-                  disabled={isLoading}
-                  onClick={(e) => handleSubmit(e, "DRAFT")}
-                  className="px-8 py-3 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-lg text-xs font-semibold hover:from-gray-600 hover:to-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all shadow-lg"
-                >
-                  <SaveAll className="w-4 h-4 mr-2" />
-                  Save as Draft
-                </button>
-              )}
-              
-              <button
-                type="button"
-                disabled={isLoading}
-                onClick={(e) => handleSubmit(e, "PUBLISHED")}
-                className="px-8 py-3 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-lg text-sm font-semibold hover:from-gray-800 hover:to-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all shadow-lg"
-              >
-                {isLoading ? (
-                  <>
-                    <svg
-                      className="animate-spin -ml-1 mr-2 h-5 w-5 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      />
-                    </svg>
-                    {isDistributedEdit ? "Updating..." : "Publishing..."}
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-5 h-5 mr-2" />
-                    {isDistributedEdit ? "Update & Publish" : "Publish Article"}
-                  </>
-                )}
-              </button>
-            </div>
+  <button
+    type="button"
+    onClick={resetForm}
+    className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-all"
+  >
+    Reset Form
+  </button>
+
+  {!isDistributedEdit && (
+    <button
+      type="button"
+      disabled={isLoading}
+      onClick={(e) => handleSubmit(e, "DRAFT")}
+      className="px-8 py-3 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-lg text-xs font-semibold hover:from-gray-600 hover:to-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all shadow-lg"
+    >
+      <SaveAll className="w-4 h-4 mr-2" />
+      Save as Draft
+    </button>
+  )}
+
+  {/* Publish Article (normal) */}
+  {!isDistributedEdit && (
+    <button
+      type="button"
+      disabled={isLoading}
+      onClick={(e) => handleSubmit(e, "PUBLISHED")}
+      className="px-8 py-3 bg-gradient-to-r from-gray-600 to-gray-500 text-white rounded-lg text-sm font-semibold hover:from-gray-500 hover:to-gray-400 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all shadow-lg"
+    >
+      {isLoading ? (
+        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+        </svg>
+      ) : (
+        <>
+          <Save className="w-5 h-5 mr-2" />
+          Publish Article
+        </>
+      )}
+    </button>
+  )}
+
+  {/* Background Publish (primary CTA) */}
+  {!isDistributedEdit && (
+    <button
+      type="button"
+      disabled={isLoading}
+      onClick={handleBackgroundPublish}
+      className="px-8 py-3 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-lg text-sm font-semibold hover:from-gray-800 hover:to-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all shadow-lg"
+    >
+      {isLoading ? (
+        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+        </svg>
+      ) : (
+        <>
+          <RefreshCw className="w-5 h-5 mr-2" />
+          Background Publish
+        </>
+      )}
+    </button>
+  )}
+
+  {/* Distributed edit */}
+  {isDistributedEdit && (
+    <button
+      type="button"
+      disabled={isLoading}
+      onClick={(e) => handleSubmit(e, "PUBLISHED")}
+      className="px-8 py-3 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-lg text-sm font-semibold hover:from-gray-800 hover:to-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all shadow-lg"
+    >
+      {isLoading ? (
+        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+        </svg>
+      ) : (
+        <>
+          <Save className="w-5 h-5 mr-2" />
+          Update & Publish
+        </>
+      )}
+    </button>
+  )}
+</div>
           </form>
         </div>
       </div>
