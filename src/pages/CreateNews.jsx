@@ -1,8 +1,42 @@
 import React, { useState, useEffect } from "react";
-import {Upload,X,Plus,Calendar,Eye,Save,RefreshCw,Image as ImageIcon,Tag,FileText,Settings,Clock,TrendingUp,AlertCircle,Star,Crop,RotateCw,ZoomIn,Maximize2,SaveAll,} from "lucide-react";
+import {
+  Upload,
+  X,
+  Plus,
+  Calendar,
+  Eye,
+  Save,
+  RefreshCw,
+  Image as ImageIcon,
+  Tag,
+  FileText,
+  Settings,
+  Clock,
+  TrendingUp,
+  AlertCircle,
+  Star,
+  Crop,
+  RotateCw,
+  ZoomIn,
+  Maximize2,
+  SaveAll,
+} from "lucide-react";
 import Cropper from "react-easy-crop";
 import { CKEditor } from "ckeditor4-react";
-import {createNewsArticle,publishNewsArticle,fetchAllTags,updateDistributedNews,uploadMultipleImages,fetchDistributedNewsDetail,fetchPortalParentCategories,fetchCrossPortalMappings,fetchDraftNews,updateDraftNews,fetchPortals,fetchUserPortalsByUserId,fetchSubCategoriesByParent,
+import {
+  createNewsArticle,
+  publishNewsArticle,
+  fetchAllTags,
+  updateDistributedNews,
+  uploadMultipleImages,
+  fetchDistributedNewsDetail,
+  fetchPortalParentCategories,
+  fetchCrossPortalMappings,
+  fetchDraftNews,
+  updateDraftNews,
+  fetchPortals,
+  fetchUserPortalsByUserId,
+  fetchSubCategoriesByParent,
 } from "../../server";
 import constant from "../../Constant";
 import { toast } from "react-toastify";
@@ -42,9 +76,9 @@ const NewsArticleForm = () => {
   const [isCrossMappingChecked, setIsCrossMappingChecked] = useState(false);
   const [cropPreview, setCropPreview] = useState(null);
 
-   const [isPublished, setIsPublished] = useState(false);
-   const [activePortalForCrop, setActivePortalForCrop] = useState(null);
-   const [originalDraft, setOriginalDraft] = useState(null);
+  const [isPublished, setIsPublished] = useState(false);
+  const [activePortalForCrop, setActivePortalForCrop] = useState(null);
+  const [originalDraft, setOriginalDraft] = useState(null);
   const [isCategoryloading, setIsCategoryloading] = useState(true);
   const [availableTags, setAvailableTags] = useState([]);
   const [isTagsLoading, setIsTagsLoading] = useState(true);
@@ -52,12 +86,13 @@ const NewsArticleForm = () => {
   const [showPortalCategoryModal, setShowPortalCategoryModal] = useState(false);
   const [portalList, setPortalList] = useState([]);
   const [portalCategoriesModal, setPortalCategoriesModal] = useState([]);
-  const [selectedPortalForCategories, setSelectedPortalForCategories] = useState("");
+  const [selectedPortalForCategories, setSelectedPortalForCategories] =
+    useState("");
   const [portalPage, setPortalPage] = useState(1);
   const [categoryPage, setCategoryPage] = useState(1);
   const [hasNextCategoryPage, setHasNextCategoryPage] = useState(false);
   const [imagePreview, setImagePreview] = useState(
-    formData.image ? `${constant.appBaseUrl}${formData?.image}` : null
+    formData.image ? `${constant.appBaseUrl}${formData?.image}` : null,
   );
   const [isLoading, setIsLoading] = useState(false);
   const [showCropper, setShowCropper] = useState(false);
@@ -89,17 +124,20 @@ const NewsArticleForm = () => {
   const [showTagDropdown, setShowTagDropdown] = useState(false);
   const [showPublishWarning, setShowPublishWarning] = useState(false);
 
-      // Add this inside the component
-    const location = useLocation();
-    const navigate = useNavigate();
-    const queryParams = new URLSearchParams(location.search);
-    const distId = queryParams.get("dist_id");
-    const [isDistributedEdit, setIsDistributedEdit] = useState(false);
-    const [distributedNewsId, setDistributedNewsId] = useState(null);
-    const [portalImages, setPortalImages] = useState({}); 
-    const [portalImagePreviews, setPortalImagePreviews] = useState({}); 
-    const [showPortalImageUpload, setShowPortalImageUpload] = useState(false);
-    const canUploadImages = !isPublished && isCrossMappingChecked && mappedPortals.some(p => p.mapping_found === true);
+  // Add this inside the component
+  const location = useLocation();
+  const navigate = useNavigate();
+  const queryParams = new URLSearchParams(location.search);
+  const distId = queryParams.get("dist_id");
+  const [isDistributedEdit, setIsDistributedEdit] = useState(false);
+  const [distributedNewsId, setDistributedNewsId] = useState(null);
+  const [portalImages, setPortalImages] = useState({});
+  const [portalImagePreviews, setPortalImagePreviews] = useState({});
+  const [showPortalImageUpload, setShowPortalImageUpload] = useState(false);
+  const canUploadImages =
+    !isPublished &&
+    isCrossMappingChecked &&
+    mappedPortals.some((p) => p.mapping_found === true);
   const filteredTags = availableTags.filter((tag) => {
     const matchesSearch = tag.name
       .toLowerCase()
@@ -119,7 +157,7 @@ const NewsArticleForm = () => {
         const allPortals = res?.data?.data || [];
         // Filter out the currently selected portal
         const filteredPortals = allPortals.filter(
-          (portal) => portal.id !== Number(formData.master_category)
+          (portal) => portal.id !== Number(formData.master_category),
         );
         setPortalList(filteredPortals);
       });
@@ -130,7 +168,7 @@ const NewsArticleForm = () => {
     if (selectedPortalForCategories && categoryPage === 1) {
       fetchPortalParentCategories(
         selectedPortalForCategories,
-        categoryPage
+        categoryPage,
       ).then((res) => {
         console.log("Fetched categories:", res?.data?.data?.parent_categories);
         const categories = res?.data?.data?.parent_categories || [];
@@ -149,20 +187,20 @@ const NewsArticleForm = () => {
   }, [isEditMode, id]);
 
   // Add this useEffect to load distributed news data
-useEffect(() => {
-  const loadDistributedNewsData = async () => {
-    if (distId) {
-      try {
-        setIsLoading(false);  
-        const res = await fetchDistributedNewsDetail(distId);
-        
-        if (res?.data?.status) {
-          const dist = res.data.data;
-          
-          setIsDistributedEdit(true);
-          setDistributedNewsId(distId);
-          
-         const nd = res.data.data.portal_response;
+  useEffect(() => {
+    const loadDistributedNewsData = async () => {
+      if (distId) {
+        try {
+          setIsLoading(false);
+          const res = await fetchDistributedNewsDetail(distId);
+
+          if (res?.data?.status) {
+            const dist = res.data.data;
+
+            setIsDistributedEdit(true);
+            setDistributedNewsId(distId);
+
+            const nd = res.data.data.portal_response;
 
             setFormData({
               headline: nd.post_title || "",
@@ -174,11 +212,11 @@ useEffect(() => {
               slug: nd.slug || generateSlug(nd.post_title || ""),
               status: "PUBLISHED",
               image: null,
-             tags: nd.post_tag 
-                      ? nd.post_tag
-                          .split(",")                // "#AI", " #climate"
-                          .map(t => t.replace("#","").trim())  // "AI", "climate"
-                      : [],
+              tags: nd.post_tag
+                ? nd.post_tag
+                    .split(",") // "#AI", " #climate"
+                    .map((t) => t.replace("#", "").trim()) // "AI", "climate"
+                : [],
               latestNews: nd.Head_Lines || false,
               headlines: nd.Head_Lines || false,
               articles: nd.articles || false,
@@ -193,61 +231,59 @@ useEffect(() => {
               slugEdited: false,
               master_category: res.data.data.portal_news_id || "",
             });
-             setEditorKey(Date.now());
-          
-          // Set image preview if available
-         if (nd.post_image) {
-          setImagePreview(nd.post_image);
-        }
+            setEditorKey(Date.now());
 
-          
+            // Set image preview if available
+            if (nd.post_image) {
+              setImagePreview(nd.post_image);
+            }
+          }
+        } catch (err) {
+          console.error("Failed to load distributed news:", err);
+          toast.error("Failed to load distributed news data");
+        } finally {
+          setIsLoading(false);
         }
-      } catch (err) {
-        console.error("Failed to load distributed news:", err);
-        toast.error("Failed to load distributed news data");
-      } finally {
-        setIsLoading(false);
       }
-    }
-  };
-  
-  loadDistributedNewsData();
-}, [distId]);
+    };
 
- const handlePortalCategoryClick = async (portal) => {
-  try {
-    setIsPortalsLoading(true);
+    loadDistributedNewsData();
+  }, [distId]);
 
-    // Push history ONLY when loading subcategories (NOT parent level)
-    if (mappedPortals.length > 0) {
-      setCategoryHistory((prev) => [...prev, mappedPortals]);
-    }
+  const handlePortalCategoryClick = async (portal) => {
+    try {
+      setIsPortalsLoading(true);
 
-    let subcats = [];
-    let hasSubcategories = false;
-
-    // ✅ FIX: Only try to fetch subcategories if we're NOT already viewing subcategories
-    if (!isViewingSubcategories) {
-      try {
-        const subCatRes = await fetchSubCategoriesByParent(
-          portal.portalId,
-          portal.portalCategoryId
-        );
-        subcats = subCatRes?.data?.data?.categories || [];
-
-        if (subcats.length > 0) {
-          hasSubcategories = true;
-          setIsViewingSubcategories(true); // Mark that we're viewing subcategories
-        }
-      } catch (subError) {
-        hasSubcategories = false;
+      // Push history ONLY when loading subcategories (NOT parent level)
+      if (mappedPortals.length > 0) {
+        setCategoryHistory((prev) => [...prev, mappedPortals]);
       }
-    }
 
-    if (hasSubcategories) {
-      console.log("✅ Showing subcategories");
-      setIsViewingSubcategories(true);
-     setMappedPortals(
+      let subcats = [];
+      let hasSubcategories = false;
+
+      // ✅ FIX: Only try to fetch subcategories if we're NOT already viewing subcategories
+      if (!isViewingSubcategories) {
+        try {
+          const subCatRes = await fetchSubCategoriesByParent(
+            portal.portalId,
+            portal.portalCategoryId,
+          );
+          subcats = subCatRes?.data?.data?.categories || [];
+
+          if (subcats.length > 0) {
+            hasSubcategories = true;
+            setIsViewingSubcategories(true); // Mark that we're viewing subcategories
+          }
+        } catch (subError) {
+          hasSubcategories = false;
+        }
+      }
+
+      if (hasSubcategories) {
+        console.log("✅ Showing subcategories");
+        setIsViewingSubcategories(true);
+        setMappedPortals(
           subcats.map((c) => ({
             id: c.id,
             portalId: portal.portalId,
@@ -258,118 +294,122 @@ useEffect(() => {
             selected: true,
             has_subcategories: true,
             is_manually_added: false, // ✅ ADD THIS - from click flow, not modal
-          }))
+          })),
+        );
+        return; // ✅ EXIT HERE - Don't call cross-portal mapping API
+      }
+
+      console.log(
+        "🔍 Calling cross-portal mapping API for portal.id:",
+        portal.id,
       );
-      return; // ✅ EXIT HERE - Don't call cross-portal mapping API
-    }
+      try {
+        const matchingRes = await fetchCrossPortalMappings(portal.id);
+        setIsCrossMappingChecked(true);
+        const matchingData = matchingRes?.data?.data || {};
+        const mappingFound = matchingData.mapping_found;
+        const requestedCategory = matchingData.requested_portal_category;
+        const mappedCategories = matchingData.mapped_portal_categories || [];
 
-    console.log("🔍 Calling cross-portal mapping API for portal.id:", portal.id);
-    try {
+        // Always show matching results if mapping is found
+        if (
+          mappingFound &&
+          (mappedCategories.length > 0 || requestedCategory)
+        ) {
+          setIsViewingSubcategories(false); // Reset subcategory view flag
 
-      const matchingRes = await fetchCrossPortalMappings(portal.id);
-       setIsCrossMappingChecked(true);
-      const matchingData = matchingRes?.data?.data || {};
-      const mappingFound = matchingData.mapping_found;
-      const requestedCategory = matchingData.requested_portal_category;
-      const mappedCategories = matchingData.mapped_portal_categories || [];
+          // Combine requested category with mapped categories
+          const allCategories = [];
 
-      // Always show matching results if mapping is found
-      if (mappingFound && (mappedCategories.length > 0 || requestedCategory)) {
-        setIsViewingSubcategories(false); // Reset subcategory view flag
+          // Add requested category first
+          if (requestedCategory) {
+            allCategories.push({
+              id: requestedCategory.id,
+              portalId: requestedCategory.portal_id || portal.portalId,
+              portalName: requestedCategory.portal_name || portal.portalName,
+              portalCategoryName: requestedCategory.name,
+              portalParentCategory: requestedCategory.parent_name,
+              portalCategoryId: requestedCategory.id,
+              selected: true,
+              mapping_found: mappingFound,
+              master_category_id: matchingData.master_category_id,
+              is_requested: true,
+              selected: true,
+            });
+          }
 
-        // Combine requested category with mapped categories
-        const allCategories = [];
-
-        // Add requested category first
-        if (requestedCategory) {
-          allCategories.push({
-            id: requestedCategory.id,
-            portalId: requestedCategory.portal_id || portal.portalId,
-            portalName: requestedCategory.portal_name || portal.portalName,
-            portalCategoryName: requestedCategory.name,
-            portalParentCategory: requestedCategory.parent_name,
-            portalCategoryId: requestedCategory.id,  
-             selected: true,
-            mapping_found: mappingFound,
-            master_category_id: matchingData.master_category_id,
-             is_requested: true,
-             selected: true, 
+          // Add mapped categories
+          mappedCategories.forEach((c) => {
+            allCategories.push({
+              id: c.id,
+              portalId: c.portal_id,
+              portalName: c.portal_name,
+              portalCategoryName: c.name,
+              portalParentCategory: c.parent_name,
+              portalCategoryId: c.id,
+              selected: true,
+              mapping_found: mappingFound,
+              master_category_id: matchingData.master_category_id,
+            });
           });
+
+          setMappedPortals(allCategories);
+
+          const totalCount = allCategories.length;
+          toast.success(`Found ${mappedCategories.length} matched categories `);
+        } else if (requestedCategory && !hasSubcategories) {
+          setMappedPortals([
+            {
+              id: requestedCategory.id,
+              portalId: requestedCategory.portal_id || portal.portalId,
+              portalName: requestedCategory.portal_name || portal.portalName,
+              portalCategoryName: requestedCategory.name,
+              portalParentCategory: requestedCategory.parent_name,
+              portalCategoryId: requestedCategory.id,
+              selected: true,
+              mapping_found: mappingFound,
+            },
+          ]);
+
+          if (!mappingFound) {
+            toast.info("No related categories mapped yet");
+          }
+        } else if (!hasSubcategories && !mappingFound) {
+          // No subcategories and no mapping found
+          toast.info("No categories found for this selection");
+          setCategoryHistory((prev) => prev.slice(0, -1));
         }
-
-        // Add mapped categories
-        mappedCategories.forEach((c) => {
-          allCategories.push({
-            id: c.id,
-            portalId: c.portal_id,
-            portalName: c.portal_name,
-            portalCategoryName: c.name,
-            portalParentCategory: c.parent_name,
-             portalCategoryId: c.id,
-            selected: true,
-            mapping_found: mappingFound,
-            master_category_id: matchingData.master_category_id,
-          });
-        });
-
-        setMappedPortals(allCategories);
-
-        const totalCount = allCategories.length;
-        toast.success(`Found ${mappedCategories.length} matched categories `);
-      } else if (requestedCategory && !hasSubcategories) {
-        setMappedPortals([
-          {
-            id: requestedCategory.id,
-            portalId: requestedCategory.portal_id || portal.portalId,
-            portalName: requestedCategory.portal_name || portal.portalName,
-            portalCategoryName: requestedCategory.name,
-            portalParentCategory: requestedCategory.parent_name,
-            portalCategoryId: requestedCategory.id,
-            selected: true,
-            mapping_found: mappingFound,
-          },
-        ]);
-
-        if (!mappingFound) {
-          toast.info("No related categories mapped yet");
+      } catch (matchError) {
+        setIsCrossMappingChecked(true);
+        // If no subcategories and matching failed, remove from history
+        if (!hasSubcategories) {
+          setCategoryHistory((prev) => prev.slice(0, -1));
+          toast.error("Failed to load categories");
         }
-      } else if (!hasSubcategories && !mappingFound) {
-        // No subcategories and no mapping found
-        toast.info("No categories found for this selection");
-        setCategoryHistory((prev) => prev.slice(0, -1));
       }
-    } catch (matchError) {
-      setIsCrossMappingChecked(true);
-      // If no subcategories and matching failed, remove from history
-      if (!hasSubcategories) {
-        setCategoryHistory((prev) => prev.slice(0, -1));
-        toast.error("Failed to load categories");
-      }
+    } catch (e) {
+      console.error("❌ Unexpected error:", e);
+      toast.error("Failed to load categories. Please try again.");
+      setCategoryHistory((prev) => prev.slice(0, -1));
+    } finally {
+      setIsPortalsLoading(false);
     }
-  } catch (e) {
-    console.error("❌ Unexpected error:", e);
-    toast.error("Failed to load categories. Please try again.");
-    setCategoryHistory((prev) => prev.slice(0, -1));
-  } finally {
-    setIsPortalsLoading(false);
-  }
-};
+  };
 
   const handleCategorySelect = async (e, loadNext = false) => {
     const categoryId = loadNext ? formData.master_category : e.target.value;
 
-   if (!loadNext) {
-  setFormData((prev) => ({
-    ...prev,
-    master_category: categoryId,
-  }));
-  
-  setMappedPortals([]);          // clear old categories
-  setCategoryHistory([]);        // reset history
-  setShowPortalSection(false);   // hide header while loading
-  setIsViewingSubcategories(false); // reset subcategory view flag
-}
+    if (!loadNext) {
+      setFormData((prev) => ({
+        ...prev,
+        master_category: categoryId,
+      }));
 
+      setMappedPortals([]); // clear old categories
+      setCategoryHistory([]); // reset history
+      setShowPortalSection(false); // hide header while loading
+      setIsViewingSubcategories(false); // reset subcategory view flag
+    }
 
     if (!categoryId) {
       setMappedPortals([]);
@@ -382,7 +422,7 @@ useEffect(() => {
       if (loadNext) setIsLoadingMore(true);
       const res = await fetchPortalParentCategories(
         categoryId,
-        loadNext ? nextPage : 1
+        loadNext ? nextPage : 1,
       );
       const raw = res?.data?.data;
       console.log("raew", raw);
@@ -400,7 +440,7 @@ useEffect(() => {
 
         // Get the selected portal name from assignedCategories
         const selectedPortal = assignedCategories.find(
-          (cat) => cat.id === Number(categoryId)
+          (cat) => cat.id === Number(categoryId),
         );
         const portalName = selectedPortal?.name || "Portal";
 
@@ -474,7 +514,7 @@ useEffect(() => {
     setOriginalDraft(draft);
 
     setImagePreview(
-      draft?.post_image ? `${constant.appBaseUrl}${draft.post_image}` : null
+      draft?.post_image ? `${constant.appBaseUrl}${draft.post_image}` : null,
     );
     setShowDrafts(false);
     // toast.info(`Loaded draft: ${draft.title}`);
@@ -503,51 +543,50 @@ useEffect(() => {
     }
   };
 
- // Add this helper function to handle portal-specific image uploads
-const handlePortalImageUpload = (portalId, file) => {
-  if (!file) return;
+  // Add this helper function to handle portal-specific image uploads
+  const handlePortalImageUpload = (portalId, file) => {
+    if (!file) return;
 
-  if (file.size > 10 * 1024 * 1024) {
-    toast.warning("Image size must be less than 10MB");
-    return;
-  }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.warning("Image size must be less than 10MB");
+      return;
+    }
 
-  // ✅ STORE ORIGINAL FILE TEMPORARILY (so we can get its name later)
-  setPortalImages(prev => ({
-    ...prev,
-    [portalId]: file
-  }));
+    // ✅ STORE ORIGINAL FILE TEMPORARILY (so we can get its name later)
+    setPortalImages((prev) => ({
+      ...prev,
+      [portalId]: file,
+    }));
 
-  // ✅ TELL SYSTEM THIS IS PORTAL IMAGE (NOT FEATURED)
-  setActivePortalForCrop(portalId);
+    // ✅ TELL SYSTEM THIS IS PORTAL IMAGE (NOT FEATURED)
+    setActivePortalForCrop(portalId);
 
-  // ✅ OPEN CROPPER ONLY FOR PORTAL IMAGE
-  setCropPreview(URL.createObjectURL(file));
-  setShowCropper(true);
-};
+    // ✅ OPEN CROPPER ONLY FOR PORTAL IMAGE
+    setCropPreview(URL.createObjectURL(file));
+    setShowCropper(true);
+  };
 
+  // Add this helper function to remove portal image
+  const removePortalImage = (portalId) => {
+    // Revoke preview URL
+    if (portalImagePreviews[portalId]) {
+      URL.revokeObjectURL(portalImagePreviews[portalId]);
+    }
 
-// Add this helper function to remove portal image
-const removePortalImage = (portalId) => {
-  // Revoke preview URL
-  if (portalImagePreviews[portalId]) {
-    URL.revokeObjectURL(portalImagePreviews[portalId]);
-  }
-  
-  // Remove from state
-  setPortalImages(prev => {
-    const updated = { ...prev };
-    delete updated[portalId];
-    return updated;
-  });
-  
-  setPortalImagePreviews(prev => {
-    const updated = { ...prev };
-    delete updated[portalId];
-    return updated;
-  });
-};
-const buildDraftDiff = (oldData, newData) => {
+    // Remove from state
+    setPortalImages((prev) => {
+      const updated = { ...prev };
+      delete updated[portalId];
+      return updated;
+    });
+
+    setPortalImagePreviews((prev) => {
+      const updated = { ...prev };
+      delete updated[portalId];
+      return updated;
+    });
+  };
+  const buildDraftDiff = (oldData, newData) => {
     const diff = {};
     Object.keys(newData).forEach((key) => {
       if (newData[key] !== oldData[key]) diff[key] = newData[key];
@@ -604,7 +643,7 @@ const buildDraftDiff = (oldData, newData) => {
     const { width: rotatedW, height: rotatedH } = rotateSize(
       image.width,
       image.height,
-      rotationDeg
+      rotationDeg,
     );
 
     const tempCanvas = document.createElement("canvas");
@@ -622,7 +661,6 @@ const buildDraftDiff = (oldData, newData) => {
     outCtx.imageSmoothingEnabled = false;
     outCtx.imageSmoothingQuality = "high";
 
-
     outCtx.drawImage(
       tempCanvas,
       Math.round(cropPixels.x),
@@ -632,7 +670,7 @@ const buildDraftDiff = (oldData, newData) => {
       0,
       0,
       Math.round(cropPixels.width),
-      Math.round(cropPixels.height)
+      Math.round(cropPixels.height),
     );
 
     return await new Promise((resolve) => {
@@ -669,7 +707,7 @@ const buildDraftDiff = (oldData, newData) => {
         toast.warning("Image size must be less than 10MB");
         return;
       }
-       setActivePortalForCrop(null); 
+      setActivePortalForCrop(null);
       setFormData((prev) => ({ ...prev, image: file }));
       setCropPreview(URL.createObjectURL(file));
       setCrop({ x: 0, y: 0 });
@@ -690,79 +728,77 @@ const buildDraftDiff = (oldData, newData) => {
   };
 
   const applyCrop = async () => {
-     console.log("DEBUG activePortalForCrop:", activePortalForCrop);
-    if (!cropPreview  || !croppedAreaPixels) {
+    console.log("DEBUG activePortalForCrop:", activePortalForCrop);
+    if (!cropPreview || !croppedAreaPixels) {
       setShowCropper(false);
       return;
     }
     try {
       const blob = await getCroppedImg(
-       cropPreview,
+        cropPreview,
         croppedAreaPixels,
-        rotation
+        rotation,
       );
       if (!blob) return;
-     const originalName = activePortalForCrop !== null 
-  ? (portalImages[activePortalForCrop]?.name || formData?.image?.name || "image.jpg")
-  : (formData?.image?.name || "image.jpg");
+      const originalName =
+        activePortalForCrop !== null
+          ? portalImages[activePortalForCrop]?.name ||
+            formData?.image?.name ||
+            "image.jpg"
+          : formData?.image?.name || "image.jpg";
 
-    const baseName = originalName.replace(/\.[^/.]+$/, "");
+      const baseName = originalName.replace(/\.[^/.]+$/, "");
 
-    const croppedFile = new File([blob], `${baseName}.jpg`, {
-      type: "image/jpeg",
-    });
-
-    
+      const croppedFile = new File([blob], `${baseName}.jpg`, {
+        type: "image/jpeg",
+      });
 
       // Convert JPEG → WebP
       let finalFile = croppedFile;
       try {
-       const { webpBlob } = await webpfy({
-        image: croppedFile,
-        fileName: `${baseName}.webp`,
-        lossless: true
-      });
+        const { webpBlob } = await webpfy({
+          image: croppedFile,
+          fileName: `${baseName}.webp`,
+          lossless: true,
+        });
 
         if (webpBlob) {
-          finalFile = new File(
-                [webpBlob],
-                `${baseName}.webp`,
-                { type: "image/webp" }
-              );
-         
+          finalFile = new File([webpBlob], `${baseName}.webp`, {
+            type: "image/webp",
+          });
         }
       } catch (webpError) {
         console.warn("WebP conversion failed, using original JPEG:", webpError);
       }
 
       if (activePortalForCrop !== null) {
-          // ✅ PORTAL IMAGE ONLY - Use finalFile (WebP converted)
-          setPortalImages(prev => ({
-            ...prev,
-            [activePortalForCrop]: finalFile  // ← Changed from croppedFile
-          }));
+        // ✅ PORTAL IMAGE ONLY - Use finalFile (WebP converted)
+        setPortalImages((prev) => ({
+          ...prev,
+          [activePortalForCrop]: finalFile, // ← Changed from croppedFile
+        }));
 
-          setPortalImagePreviews(prev => ({
-            ...prev,
-            [activePortalForCrop]: URL.createObjectURL(finalFile)  // ← Changed from croppedFile
-          }));
+        setPortalImagePreviews((prev) => ({
+          ...prev,
+          [activePortalForCrop]: URL.createObjectURL(finalFile), // ← Changed from croppedFile
+        }));
 
-          // ✅ RESET FLAG
-          setActivePortalForCrop(null);
-          } else {
-            // ✅ FEATURED IMAGE ONLY - Use finalFile (WebP converted)
-            setFormData(prev => ({ ...prev, image: finalFile }));  // ← Changed from croppedFile
-            setPreviewFromFile(finalFile);  // ← Changed from croppedFile
-            console.log("FINAL FEATURED IMAGE TYPE:", finalFile.type);
-          }
-      } catch (e) {
-            console.error("Crop failed", e);
-          } finally {
-            setCropPreview(null);
-             setShowCropper(false);
-              setActivePortalForCrop(null);
-          }
-        };
+        // ✅ RESET FLAG
+        setActivePortalForCrop(null);
+      } else {
+        // ✅ FEATURED IMAGE ONLY - Use finalFile (WebP converted)
+        setFormData((prev) => ({ ...prev, image: finalFile })); // ← Changed from croppedFile
+        setPreviewFromFile(finalFile); // ← Changed from croppedFile
+        console.log("FINAL FEATURED IMAGE TYPE:", finalFile.type);
+      }
+    } catch (e) {
+      console.error("Crop failed", e);
+    } finally {
+      setCropPreview(null);
+      setShowCropper(false);
+      setActivePortalForCrop(null);
+    }
+  };
 
   useEffect(() => {
     const loadTags = async () => {
@@ -826,7 +862,7 @@ const buildDraftDiff = (oldData, newData) => {
           // 🔥 FETCH PARENT CATEGORIES (NO WAITING)
           try {
             const categoryRes = await fetchPortalParentCategories(
-              defaultPortal.id
+              defaultPortal.id,
             );
             const parents = categoryRes?.data?.data?.parent_categories || [];
 
@@ -839,7 +875,7 @@ const buildDraftDiff = (oldData, newData) => {
                 portalCategoryId: c.parent_external_id,
                 selected: true,
                 has_subcategories: true,
-              }))
+              })),
             );
           } catch (err) {
             console.error("❌ Failed to fetch parent categories:", err);
@@ -872,7 +908,7 @@ const buildDraftDiff = (oldData, newData) => {
         // 🔥 CLOSE THE MODAL WHEN NO PORTALS
         setShowPortalCategoryModal(false);
       }
-   } catch (err) {
+    } catch (err) {
       console.error("❌ Failed to fetch portal list:", err);
       setAssignedCategories([]);
       setMappedPortals([]);
@@ -885,40 +921,38 @@ const buildDraftDiff = (oldData, newData) => {
       setIsPortalsLoading(false);
     }
   };
-const resetPortalImages = () => {
-  setShowPortalImageUpload(false); // modal close
-  setPortalImages({});
-  setPortalImagePreviews({});
-};
-const handleGoBack = (resetImages) => {
-  if (categoryHistory.length > 0) {
-    const previousState = categoryHistory[categoryHistory.length - 1];
+  const resetPortalImages = () => {
+    setShowPortalImageUpload(false); // modal close
+    setPortalImages({});
+    setPortalImagePreviews({});
+  };
+  const handleGoBack = (resetImages) => {
+    if (categoryHistory.length > 0) {
+      const previousState = categoryHistory[categoryHistory.length - 1];
 
-    // 🔁 restore previous mapped portals
-    setMappedPortals(previousState);
+      // 🔁 restore previous mapped portals
+      setMappedPortals(previousState);
 
-    // 🧹 pop history
-    setCategoryHistory((prev) => prev.slice(0, -1));
+      // 🧹 pop history
+      setCategoryHistory((prev) => prev.slice(0, -1));
 
-    // ⬅️ exit subcategory view
-    setIsViewingSubcategories(false);
+      // ⬅️ exit subcategory view
+      setIsViewingSubcategories(false);
 
-    // 🔍 check mapping exists or not
-    const hasMappedPortals = previousState.some(
-      (p) => p.mapping_found === true
-    );
+      // 🔍 check mapping exists or not
+      const hasMappedPortals = previousState.some(
+        (p) => p.mapping_found === true,
+      );
 
-    // ❌ reset cross mapping & images ONLY when mapping not found
-    if (!hasMappedPortals) {
-      setIsCrossMappingChecked(false);
+      // ❌ reset cross mapping & images ONLY when mapping not found
+      if (!hasMappedPortals) {
+        setIsCrossMappingChecked(false);
 
-      // 🔥 close modal + clear images safely
-      resetImages?.();
+        // 🔥 close modal + clear images safely
+        resetImages?.();
+      }
     }
-  }
-};
-
-
+  };
 
   useEffect(() => {
     loadAssignedCategories();
@@ -948,184 +982,417 @@ const handleGoBack = (resetImages) => {
     }));
   };
 
-// NewsArticleForm.jsx - Replace the handleSubmit function with this updated version
+  // NewsArticleForm.jsx - Replace the handleSubmit function with this updated version
 
-const handleSubmit = async (e, statusType = "PUBLISHED") => {
-  e.preventDefault();
+  const handleSubmit = async (e, statusType = "PUBLISHED") => {
+    e.preventDefault();
 
-  const valid_statuses = ["DRAFT", "PUBLISHED", "rejected"];
+    const valid_statuses = ["DRAFT", "PUBLISHED", "rejected"];
 
-  if (!formData.meta_title.trim()) {
-    toast.warning("Meta title is required.");
-    return;
-  }
+    if (!formData.meta_title.trim()) {
+      toast.warning("Meta title is required.");
+      return;
+    }
 
-  if (!valid_statuses.includes(statusType)) {
-    toast.warning(`Invalid status. Must be one of: ${valid_statuses.join(", ")}`);
-    return;
-  }
+    if (!valid_statuses.includes(statusType)) {
+      toast.warning(
+        `Invalid status. Must be one of: ${valid_statuses.join(", ")}`,
+      );
+      return;
+    }
 
-  if (!formData.image && !imagePreview) {
-    toast.warning("Please upload a post image before submitting.");
-    return;
-  }
+    if (!formData.image && !imagePreview) {
+      toast.warning("Please upload a post image before submitting.");
+      return;
+    }
 
-  if (formData.shortDesc.length > 160) {
-    toast.warning("Short description must be less than 160 characters.");
-    return;
-  }
+    if (formData.shortDesc.length > 160) {
+      toast.warning("Short description must be less than 160 characters.");
+      return;
+    }
 
-  setIsLoading(true);
+    setIsLoading(true);
 
-  try {
-    // ✅ Handle DISTRIBUTED NEWS UPDATE
-if (isDistributedEdit && distributedNewsId) {
-  const updatePayload = {
-   ai_title: formData.headline || formData.title,
-    ai_short_description: formData.shortDesc,
-    ai_content: formData.longDesc,
-    ai_meta_title: formData.meta_title,
-    ai_slug: formData.slug,
-    post_tag: formData.tags && formData.tags.length > 0
-      ? formData.tags
+    try {
+      // ✅ Handle DISTRIBUTED NEWS UPDATE
+      if (isDistributedEdit && distributedNewsId) {
+        const updatePayload = {
+          ai_title: formData.headline || formData.title,
+          ai_short_description: formData.shortDesc,
+          ai_content: formData.longDesc,
+          ai_meta_title: formData.meta_title,
+          ai_slug: formData.slug,
+          post_tag:
+            formData.tags && formData.tags.length > 0
+              ? formData.tags
+                  .map((tag) => {
+                    const tagData = availableTags.find((t) => t.id === tag);
+                    const tagName = tagData ? tagData.name : tag;
+                    return `#${tagName}`;
+                  })
+                  .join(", ")
+              : "",
+          is_active: formData.latestNews ? 1 : 0,
+          Head_Lines: formData.headlines ? 1 : 0,
+          articles: formData.articles ? 1 : 0,
+          trending: formData.trending ? 1 : 0,
+          BreakingNews: formData.breakingNews ? 1 : 0,
+          Event: formData.upcomingEvents ? 1 : 0,
+          Event_date: formData.eventStartDate
+            ? new Date(formData.eventStartDate).toISOString().split("T")[0]
+            : null,
+          Event_end_date: formData.eventEndDate
+            ? new Date(formData.eventEndDate).toISOString().split("T")[0]
+            : null,
+          schedule_date: formData.scheduleDate || null,
+          post_status: statusType === "PUBLISHED" ? 100 : 0,
+        };
+
+        // Only add image if a new one was uploaded
+        if (formData.image && typeof formData.image !== "string") {
+          updatePayload.edited_image = formData.image;
+        }
+
+        const res = await updateDistributedNews(
+          distributedNewsId,
+          updatePayload,
+        );
+
+        if (res?.data?.status) {
+          // Clear all fields after update
+          resetForm();
+          setImagePreview(null);
+          setMappedPortals([]);
+          setCategoryHistory([]);
+          // Redirect back to news list
+          navigate("/news-list");
+
+          return;
+        } else {
+          toast.error(
+            res?.data?.message || "Failed to update distributed news.",
+          );
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      // ✅ Original logic for master news posts (unchanged)
+      const formDataToSend = new FormData();
+
+      formDataToSend.append("title", formData.title || formData.headline);
+      formDataToSend.append("short_description", formData.shortDesc);
+      formDataToSend.append("content", formData.longDesc);
+      formDataToSend.append("post_image", formData.image);
+      formDataToSend.append("meta_title", formData.meta_title);
+      formDataToSend.append("slug", formData.slug);
+      formDataToSend.append("status", statusType);
+      formDataToSend.append("counter", formData.counter);
+      formDataToSend.append("order", formData.order);
+      formDataToSend.append(
+        "cross_portal_category_id",
+        mappedPortals[0]?.mapping_found
+          ? mappedPortals[0]?.portalCategoryId
+          : mappedPortals[0]?.id,
+      );
+
+      if (formData.tags && formData.tags.length > 0) {
+        const formattedTags = formData.tags
           .map((tag) => {
             const tagData = availableTags.find((t) => t.id === tag);
             const tagName = tagData ? tagData.name : tag;
             return `#${tagName}`;
           })
-          .join(", ")
-      : "",
-    is_active: formData.latestNews ? 1 : 0,
-    Head_Lines: formData.headlines ? 1 : 0,
-    articles: formData.articles ? 1 : 0,
-    trending: formData.trending ? 1 : 0,
-    BreakingNews: formData.breakingNews ? 1 : 0,
-    Event: formData.upcomingEvents ? 1 : 0,
-    Event_date: formData.eventStartDate 
-      ? new Date(formData.eventStartDate).toISOString().split("T")[0]
-      : null,
-    Event_end_date: formData.eventEndDate
-      ? new Date(formData.eventEndDate).toISOString().split("T")[0]
-      : null,
-    schedule_date: formData.scheduleDate || null,
-    post_status: statusType === "PUBLISHED" ? 100 : 0,
-  };
-
-  // Only add image if a new one was uploaded
-  if (formData.image && typeof formData.image !== 'string') {
-    updatePayload.edited_image = formData.image;
-  }
-
-  const res = await updateDistributedNews(distributedNewsId, updatePayload);
-  
-  if (res?.data?.status) {
-    
-    // Clear all fields after update
-        resetForm();
-        setImagePreview(null);
-        setMappedPortals([]);
-        setCategoryHistory([]);
-    // Redirect back to news list
-        navigate('/news-list');
-    
-    return;
-  } else {
-    toast.error(res?.data?.message || "Failed to update distributed news.");
-    setIsLoading(false);
-    return;
-  }
-}
-
-    // ✅ Original logic for master news posts (unchanged)
-    const formDataToSend = new FormData();
-
-    formDataToSend.append("title", formData.title || formData.headline);
-    formDataToSend.append("short_description", formData.shortDesc);
-    formDataToSend.append("content", formData.longDesc);
-    formDataToSend.append("post_image", formData.image);
-    formDataToSend.append("meta_title", formData.meta_title);
-    formDataToSend.append("slug", formData.slug);
-    formDataToSend.append("status", statusType);
-    formDataToSend.append("counter", formData.counter);
-    formDataToSend.append("order", formData.order);
-    formDataToSend.append(
-      "cross_portal_category_id",
-      mappedPortals[0]?.mapping_found
-        ? mappedPortals[0]?.portalCategoryId
-        : mappedPortals[0]?.id
-    );
-
-    if (formData.tags && formData.tags.length > 0) {
-      const formattedTags = formData.tags
-        .map((tag) => {
-          const tagData = availableTags.find((t) => t.id === tag);
-          const tagName = tagData ? tagData.name : tag;
-          return `#${tagName}`;
-        })
-        .join(", ");
-      formDataToSend.append("post_tag", formattedTags);
-    }
-
-    formDataToSend.append("latest_news", formData.latestNews ? "true" : "false");
-    formDataToSend.append("Head_Lines", formData.headlines ? "true" : "false");
-    formDataToSend.append("articles", formData.articles ? "true" : "false");
-    formDataToSend.append("trending", formData.trending ? "true" : "false");
-    formDataToSend.append("BreakingNews", formData.breakingNews ? "true" : "false");
-    formDataToSend.append("upcoming_event", formData.upcomingEvents ? "true" : "false");
-
-    if (formData.eventStartDate) {
-      formDataToSend.append(
-        "Event_date",
-        new Date(formData.eventStartDate).toISOString().split("T")[0]
-      );
-    }
-    if (formData.eventEndDate) {
-      formDataToSend.append(
-        "Event_end_date",
-        new Date(formData.eventEndDate).toISOString().split("T")[0]
-      );
-    }
-    if (formData.scheduleDate) {
-      formDataToSend.append("schedule_date", formData.scheduleDate);
-    }
-
-    let createdArticle;
-
-    // UPDATE EXISTING MASTER NEWS
-    if (formData.id) {
-      const nextStatus = statusType === "PUBLISHED" ? "PUBLISHED" : "DRAFT";
-      const changedFields = originalDraft
-        ? buildDraftDiff(originalDraft, formData)
-        : formData;
-
-      if (changedFields.longDesc) {
-        changedFields.content = changedFields.longDesc;
-        delete changedFields.longDesc;
+          .join(", ");
+        formDataToSend.append("post_tag", formattedTags);
       }
 
-      changedFields.title = changedFields.title || formData.headline;
-      changedFields.content = formData.longDesc || formData.content;
-      changedFields.master_category = Number(formData.master_category);
+      formDataToSend.append(
+        "latest_news",
+        formData.latestNews ? "true" : "false",
+      );
+      formDataToSend.append(
+        "Head_Lines",
+        formData.headlines ? "true" : "false",
+      );
+      formDataToSend.append("articles", formData.articles ? "true" : "false");
+      formDataToSend.append("trending", formData.trending ? "true" : "false");
+      formDataToSend.append(
+        "BreakingNews",
+        formData.breakingNews ? "true" : "false",
+      );
+      formDataToSend.append(
+        "upcoming_event",
+        formData.upcomingEvents ? "true" : "false",
+      );
 
-      const selectedCategories = mappedPortals
-  .filter((p) => p.selected && p.is_manually_added === true)
-  .map((p) => Number(p.id));
+      if (formData.eventStartDate) {
+        formDataToSend.append(
+          "Event_date",
+          new Date(formData.eventStartDate).toISOString().split("T")[0],
+        );
+      }
+      if (formData.eventEndDate) {
+        formDataToSend.append(
+          "Event_end_date",
+          new Date(formData.eventEndDate).toISOString().split("T")[0],
+        );
+      }
+      if (formData.scheduleDate) {
+        formDataToSend.append("schedule_date", formData.scheduleDate);
+      }
 
-      const excludedCategories = mappedPortals
-        .filter((p) => !p.selected)
-        .map((p) => Number(p.id));
+      let createdArticle;
 
-      // ✅ ONLY send when manually added portals exist
+      // UPDATE EXISTING MASTER NEWS
+      if (formData.id) {
+        const nextStatus = statusType === "PUBLISHED" ? "PUBLISHED" : "DRAFT";
+        const changedFields = originalDraft
+          ? buildDraftDiff(originalDraft, formData)
+          : formData;
+
+        if (changedFields.longDesc) {
+          changedFields.content = changedFields.longDesc;
+          delete changedFields.longDesc;
+        }
+
+        changedFields.title = changedFields.title || formData.headline;
+        changedFields.content = formData.longDesc || formData.content;
+        changedFields.master_category = Number(formData.master_category);
+
+        const selectedCategories = mappedPortals
+          .filter((p) => p.selected && p.is_manually_added === true)
+          .map((p) => Number(p.id));
+
+        const excludedCategories = mappedPortals
+          .filter((p) => !p.selected)
+          .map((p) => Number(p.id));
+
+        // ✅ ONLY send when manually added portals exist
         changedFields.portal_category_ids = selectedCategories.length
           ? selectedCategories
           : [];
-      changedFields.exclude_portal_categories = excludedCategories;
+        changedFields.exclude_portal_categories = excludedCategories;
 
-      createdArticle = { id: formData.id };
-      if (nextStatus === "DRAFT") toast.success("Draft saved successfully.");
+        createdArticle = { id: formData.id };
+        if (nextStatus === "DRAFT") toast.success("Draft saved successfully.");
+      }
+      // CREATE NEW MASTER NEWS
+      else {
+        const newlyAddedCategories = mappedPortals
+          .filter((p) => p.portalId === 0 && p.selected && p.portalCategoryId)
+          .map((p) => Number(p.id));
+
+        const excludedCategories = mappedPortals
+          .filter((p) => !p.selected && p.portalId !== 0 && p.portalCategoryId)
+          .map((p) => Number(p.portalCategoryId));
+
+        if (mappedPortals[0]?.mapping_found) {
+          formDataToSend.append(
+            "portal_category_ids",
+            JSON.stringify(newlyAddedCategories),
+          );
+        } else {
+          const categoryIds =
+            newlyAddedCategories.length > 0 ? newlyAddedCategories : [];
+          formDataToSend.append(
+            "portal_category_ids",
+            JSON.stringify(categoryIds),
+          );
+        }
+        formDataToSend.append(
+          "exclude_portal_categories",
+          JSON.stringify(excludedCategories),
+        );
+
+        const response = await createNewsArticle(formDataToSend);
+        createdArticle = response.data.data;
+      }
+
+      if (statusType === "DRAFT") {
+        setIsPublished(false);
+        resetForm();
+        await loadAssignedCategories();
+        setIsLoading(false);
+        return;
+      }
+
+      if (statusType === "PUBLISHED") {
+        if (Object.keys(portalImages).length > 0) {
+          try {
+            const portalImageArray = Object.entries(portalImages).map(
+              ([portalId, file]) => ({
+                portalId: Number(portalId),
+                file: file,
+              }),
+            );
+
+            await uploadMultipleImages(createdArticle.id, portalImageArray);
+            toast.success(
+              `Successfully uploaded ${portalImageArray.length} portal image${portalImageArray.length > 1 ? "s" : ""}`,
+            );
+
+            // Clear portal images after successful upload
+            setPortalImages({});
+            Object.values(portalImagePreviews).forEach((url) =>
+              URL.revokeObjectURL(url),
+            );
+            setPortalImagePreviews({});
+          } catch (imgErr) {
+            console.error("❌ Portal image upload failed:", imgErr);
+            toast.error("Failed to upload portal images. Please try again.");
+            setIsLoading(false);
+            return; // Stop execution if image upload fails
+          }
+        }
+
+        // 🔥 STEP 2: Publish article AFTER images are uploaded
+        const res = await publishNewsArticle(createdArticle.id, {
+          portal_category_id: mappedPortals[0]?.mapping_found
+            ? mappedPortals[0]?.master_category_id
+            : mappedPortals[0]?.id,
+        });
+
+        if (res?.data?.message) toast.success(res.data.message);
+        // After successful publish API call
+        if (statusType === "PUBLISHED") {
+          setIsPublished(true);
+          setShowPortalImageUpload(false);
+          setIsCrossMappingChecked(false);
+          setIsViewingSubcategories(false);
+        }
+        setMappedPortals([]);
+        setSelectedPortalForCategories("");
+        setCategoryHistory([]);
+        resetForm();
+        await loadAssignedCategories();
+
+        if (mappedPortals.length === 0 && assignedCategories.length > 0) {
+          const defaultPortalId = assignedCategories[0]?.id;
+          if (defaultPortalId) {
+            try {
+              const categoryRes =
+                await fetchPortalParentCategories(defaultPortalId);
+              const parents = categoryRes?.data?.data?.parent_categories || [];
+              if (parents.length) {
+                setMappedPortals(
+                  parents.map((c) => ({
+                    id: c.parent_external_id,
+                    portalId: defaultPortalId,
+                    portalName: assignedCategories[0].name,
+                    portalCategoryName: c.parent_name,
+                    portalCategoryId: c.parent_external_id,
+                    selected: true,
+                    has_subcategories: true,
+                  })),
+                );
+                setShowPortalSection(true);
+              } else {
+                setShowPortalSection(false);
+              }
+            } catch (err) {
+              setShowPortalSection(false);
+            }
+          }
+        } else {
+          setShowPortalSection(mappedPortals.length > 0);
+        }
+      } else {
+        resetForm();
+      }
+    } catch (err) {
+      console.error("Error processing form:", err);
+      toast.error("Failed to process form.");
+    } finally {
+      setIsLoading(false);
     }
-    // CREATE NEW MASTER NEWS
-    else {
+  };
+
+  const handleBackgroundPublish = async (e) => {
+    e.preventDefault();
+
+    if (!formData.meta_title.trim()) {
+      toast.warning("Meta title is required.");
+      return;
+    }
+
+    if (!formData.image && !imagePreview) {
+      toast.warning("Please upload a post image before submitting.");
+      return;
+    }
+
+    if (formData.shortDesc.length > 160) {
+      toast.warning("Short description must be less than 160 characters.");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // First create/publish the article normally to get the news ID
+      const formDataToSend = new FormData();
+      formDataToSend.append("title", formData.title || formData.headline);
+      formDataToSend.append("short_description", formData.shortDesc);
+      formDataToSend.append("content", formData.longDesc);
+      formDataToSend.append("post_image", formData.image);
+      formDataToSend.append("meta_title", formData.meta_title);
+      formDataToSend.append("slug", formData.slug);
+      formDataToSend.append("status", "PUBLISHED");
+      formDataToSend.append("counter", formData.counter);
+      formDataToSend.append("order", formData.order);
+      formDataToSend.append(
+        "cross_portal_category_id",
+        mappedPortals[0]?.mapping_found
+          ? mappedPortals[0]?.portalCategoryId
+          : mappedPortals[0]?.id,
+      );
+
+      if (formData.tags && formData.tags.length > 0) {
+        const formattedTags = formData.tags
+          .map((tag) => {
+            const tagData = availableTags.find((t) => t.id === tag);
+            const tagName = tagData ? tagData.name : tag;
+            return `#${tagName}`;
+          })
+          .join(", ");
+        formDataToSend.append("post_tag", formattedTags);
+      }
+
+      formDataToSend.append(
+        "latest_news",
+        formData.latestNews ? "true" : "false",
+      );
+      formDataToSend.append(
+        "Head_Lines",
+        formData.headlines ? "true" : "false",
+      );
+      formDataToSend.append("articles", formData.articles ? "true" : "false");
+      formDataToSend.append("trending", formData.trending ? "true" : "false");
+      formDataToSend.append(
+        "BreakingNews",
+        formData.breakingNews ? "true" : "false",
+      );
+      formDataToSend.append(
+        "upcoming_event",
+        formData.upcomingEvents ? "true" : "false",
+      );
+
+      if (formData.eventStartDate) {
+        formDataToSend.append(
+          "Event_date",
+          new Date(formData.eventStartDate).toISOString().split("T")[0],
+        );
+      }
+      if (formData.eventEndDate) {
+        formDataToSend.append(
+          "Event_end_date",
+          new Date(formData.eventEndDate).toISOString().split("T")[0],
+        );
+      }
+      if (formData.scheduleDate) {
+        formDataToSend.append("schedule_date", formData.scheduleDate);
+      }
+
       const newlyAddedCategories = mappedPortals
         .filter((p) => p.portalId === 0 && p.selected && p.portalCategoryId)
         .map((p) => Number(p.id));
@@ -1134,296 +1401,96 @@ if (isDistributedEdit && distributedNewsId) {
         .filter((p) => !p.selected && p.portalId !== 0 && p.portalCategoryId)
         .map((p) => Number(p.portalCategoryId));
 
-      if (mappedPortals[0]?.mapping_found) {
-        formDataToSend.append(
-          "portal_category_ids",
-          JSON.stringify(newlyAddedCategories)
-        );
-      } else {
-        const categoryIds =
-          newlyAddedCategories.length > 0
-          ? newlyAddedCategories
-          : [];
-        formDataToSend.append(
-          "portal_category_ids",
-          JSON.stringify(categoryIds)
-        );
-      }
+      formDataToSend.append(
+        "portal_category_ids",
+        JSON.stringify(newlyAddedCategories),
+      );
       formDataToSend.append(
         "exclude_portal_categories",
-        JSON.stringify(excludedCategories)
+        JSON.stringify(excludedCategories),
       );
 
-      const response = await createNewsArticle(formDataToSend);
-      createdArticle = response.data.data;
-    }
+      let response;
+      try {
+        response = await createNewsArticle(formDataToSend);
+      } catch (createErr) {
+        // createErr IS the response data directly (due to axios interceptor)
+        const errorData =
+          typeof createErr === "object" ? createErr : { message: createErr };
 
-    if (statusType === "DRAFT") {
-      setIsPublished(false); 
-      resetForm();
-      await loadAssignedCategories();
-      setIsLoading(false);
-      return;
-    }
-
-      if (statusType === "PUBLISHED") {
-      if (Object.keys(portalImages).length > 0) {
-        try {
-          const portalImageArray = Object.entries(portalImages).map(([portalId, file]) => ({
-            portalId: Number(portalId),
-            file: file
-          }));
-
-          await uploadMultipleImages(createdArticle.id, portalImageArray);
-          toast.success(`Successfully uploaded ${portalImageArray.length} portal image${portalImageArray.length > 1 ? 's' : ''}`);
-          
-          // Clear portal images after successful upload
-          setPortalImages({});
-          Object.values(portalImagePreviews).forEach(url => URL.revokeObjectURL(url));
-          setPortalImagePreviews({});
-        } catch (imgErr) {
-          console.error("❌ Portal image upload failed:", imgErr);
-          toast.error("Failed to upload portal images. Please try again.");
-          setIsLoading(false);
-          return; // Stop execution if image upload fails
+        if (errorData?.message && typeof errorData.message === "object") {
+          Object.entries(errorData.message).forEach(([field, errors]) => {
+            const messages = Array.isArray(errors) ? errors.join(", ") : errors;
+            toast.error(`${field}: ${messages}`);
+          });
+        } else {
+          toast.error(errorData?.message || "Failed to create article.");
         }
+        setIsLoading(false);
+        return;
       }
+      const createdArticle = response.data.data;
 
-      // 🔥 STEP 2: Publish article AFTER images are uploaded
-      const res = await publishNewsArticle(createdArticle.id, {
-        portal_category_id: mappedPortals[0]?.mapping_found
-          ? mappedPortals[0]?.master_category_id
-          : mappedPortals[0]?.id,
-      });
-        
-      if (res?.data?.message) toast.success(res.data.message);
-      // After successful publish API call
-        if (statusType === "PUBLISHED") {
-          setIsPublished(true);
-          setShowPortalImageUpload(false);
-           setIsCrossMappingChecked(false);
-            setIsViewingSubcategories(false); 
-        }
-       setMappedPortals([]);
-      setSelectedPortalForCategories("");
-      setCategoryHistory([]);
-      resetForm();
-      await loadAssignedCategories();
-  
-
-      
-      if (mappedPortals.length === 0 && assignedCategories.length > 0) {
-        const defaultPortalId = assignedCategories[0]?.id;
-        if (defaultPortalId) {
-          try {
-            const categoryRes = await fetchPortalParentCategories(defaultPortalId);
-            const parents = categoryRes?.data?.data?.parent_categories || [];
-            if (parents.length) {
-              setMappedPortals(
-                parents.map((c) => ({
-                  id: c.parent_external_id,
-                  portalId: defaultPortalId,
-                  portalName: assignedCategories[0].name,
-                  portalCategoryName: c.parent_name,
-                  portalCategoryId: c.parent_external_id,
-                  selected: true,
-                  has_subcategories: true,
-                }))
-              );
-              setShowPortalSection(true);
-            } else {
-              setShowPortalSection(false);
-            }
-          } catch (err) {
-            setShowPortalSection(false);
-          }
-        }
-      } else {
-        setShowPortalSection(mappedPortals.length > 0);
-      }
-    } else {
-      resetForm();
-    }
-  } catch (err) {
-    console.error("Error processing form:", err);
-    toast.error("Failed to process form.");
-  } finally {
-    setIsLoading(false);
-  }
-};
-
-const handleBackgroundPublish = async (e) => {
-  e.preventDefault();
-
-  if (!formData.meta_title.trim()) {
-    toast.warning("Meta title is required.");
-    return;
-  }
-
-  if (!formData.image && !imagePreview) {
-    toast.warning("Please upload a post image before submitting.");
-    return;
-  }
-
-  if (formData.shortDesc.length > 160) {
-    toast.warning("Short description must be less than 160 characters.");
-    return;
-  }
-
-  setIsLoading(true);
-
-  try {
-    // First create/publish the article normally to get the news ID
-    const formDataToSend = new FormData();
-    formDataToSend.append("title", formData.title || formData.headline);
-    formDataToSend.append("short_description", formData.shortDesc);
-    formDataToSend.append("content", formData.longDesc);
-    formDataToSend.append("post_image", formData.image);
-    formDataToSend.append("meta_title", formData.meta_title);
-    formDataToSend.append("slug", formData.slug);
-    formDataToSend.append("status", "PUBLISHED");
-    formDataToSend.append("counter", formData.counter);
-    formDataToSend.append("order", formData.order);
-    formDataToSend.append(
-      "cross_portal_category_id",
-      mappedPortals[0]?.mapping_found
-        ? mappedPortals[0]?.portalCategoryId
-        : mappedPortals[0]?.id
-    );
-
-    if (formData.tags && formData.tags.length > 0) {
-      const formattedTags = formData.tags
-        .map((tag) => {
-          const tagData = availableTags.find((t) => t.id === tag);
-          const tagName = tagData ? tagData.name : tag;
-          return `#${tagName}`;
-        })
-        .join(", ");
-      formDataToSend.append("post_tag", formattedTags);
-    }
-
-    formDataToSend.append("latest_news", formData.latestNews ? "true" : "false");
-    formDataToSend.append("Head_Lines", formData.headlines ? "true" : "false");
-    formDataToSend.append("articles", formData.articles ? "true" : "false");
-    formDataToSend.append("trending", formData.trending ? "true" : "false");
-    formDataToSend.append("BreakingNews", formData.breakingNews ? "true" : "false");
-    formDataToSend.append("upcoming_event", formData.upcomingEvents ? "true" : "false");
-
-    if (formData.eventStartDate) {
-      formDataToSend.append(
-        "Event_date",
-        new Date(formData.eventStartDate).toISOString().split("T")[0]
-      );
-    }
-    if (formData.eventEndDate) {
-      formDataToSend.append(
-        "Event_end_date",
-        new Date(formData.eventEndDate).toISOString().split("T")[0]
-      );
-    }
-    if (formData.scheduleDate) {
-      formDataToSend.append("schedule_date", formData.scheduleDate);
-    }
-
-    const newlyAddedCategories = mappedPortals
-      .filter((p) => p.portalId === 0 && p.selected && p.portalCategoryId)
-      .map((p) => Number(p.id));
-
-    const excludedCategories = mappedPortals
-      .filter((p) => !p.selected && p.portalId !== 0 && p.portalCategoryId)
-      .map((p) => Number(p.portalCategoryId));
-
-    formDataToSend.append(
-      "portal_category_ids",
-      JSON.stringify(newlyAddedCategories)
-    );
-    formDataToSend.append(
-      "exclude_portal_categories",
-      JSON.stringify(excludedCategories)
-    );
-
-    let response;
-    try {
-      response = await createNewsArticle(formDataToSend);
-    }catch (createErr) {
-      // createErr IS the response data directly (due to axios interceptor)
-      const errorData = typeof createErr === "object" ? createErr : { message: createErr };
-
-      if (errorData?.message && typeof errorData.message === "object") {
-        Object.entries(errorData.message).forEach(([field, errors]) => {
-          const messages = Array.isArray(errors) ? errors.join(", ") : errors;
-          toast.error(`${field}: ${messages}`);
-        });
-      } else {
-        toast.error(errorData?.message || "Failed to create article.");
-      }
-      setIsLoading(false);
-      return;
-    }
-    const createdArticle = response.data.data;
-
-    // Now call background publish API
-    const bgResponse = await fetch(
-    `${constant.appBaseUrl}/api/back-ground/publish/news/${createdArticle.id}/`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${JSON.parse(localStorage.getItem("auth_user"))?.token || ""}`,
+      // Now call background publish API
+      const bgResponse = await fetch(
+        `${constant.appBaseUrl}/api/back-ground/publish/news/${createdArticle.id}/`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${JSON.parse(localStorage.getItem("auth_user"))?.token || ""}`,
+          },
         },
+      );
+
+      const bgData = await bgResponse.json();
+
+      if (bgData?.status) {
+        toast.success("News queued successfully! Publishing in background.");
+        resetForm();
+        await loadAssignedCategories();
+      } else {
+        toast.error(bgData?.message || "Failed to queue background publish.");
       }
-    );
-
-    const bgData = await bgResponse.json();
-
-    if (bgData?.status) {
-      toast.success("News queued successfully! Publishing in background.");
-      resetForm();
-      await loadAssignedCategories();
-    } else {
-      toast.error(bgData?.message || "Failed to queue background publish.");
+    } catch (err) {
+      console.error("Background publish error:", err);
+      toast.error("Failed to queue background publish.");
+    } finally {
+      setIsLoading(false);
     }
-  } catch (err) {
-    console.error("Background publish error:", err);
-    toast.error("Failed to queue background publish.");
-  } finally {
-    setIsLoading(false);
-  }
-};
-
-
+  };
 
   const [editorKey, setEditorKey] = useState(Date.now());
   const resetForm = () => {
-     setIsPublished(false);
-     setIsCrossMappingChecked(false); 
+    setIsPublished(false);
+    setIsCrossMappingChecked(false);
     revokeIfBlob(imagePreview);
-   setFormData((prev) => ({
-  headline: "",
-  title: "",
-  shortDesc: "",
-  longDesc: "",
-  image: null,
-  tags: [],
-  content: "",
-  latestNews: false,
-  headlines: false,
-  articles: false,
-  trending: false,
-  breakingNews: false,
-  upcomingEvents: false,
-  eventStartDate: "",
-  eventEndDate: "",
-  scheduleDate: "",
-  counter: 0,
-  order: 0,
-  status: "PUBLISHED",
-  meta_title: "",
-  slug: "",
-  slugEdited: false,
+    setFormData((prev) => ({
+      headline: "",
+      title: "",
+      shortDesc: "",
+      longDesc: "",
+      image: null,
+      tags: [],
+      content: "",
+      latestNews: false,
+      headlines: false,
+      articles: false,
+      trending: false,
+      breakingNews: false,
+      upcomingEvents: false,
+      eventStartDate: "",
+      eventEndDate: "",
+      scheduleDate: "",
+      counter: 0,
+      order: 0,
+      status: "PUBLISHED",
+      meta_title: "",
+      slug: "",
+      slugEdited: false,
 
-  // 🔥 DO NOT TOUCH master_category → keep the default portal selected
-  master_category: prev.master_category,
-}));
+      // 🔥 DO NOT TOUCH master_category → keep the default portal selected
+      master_category: prev.master_category,
+    }));
 
     setTagInput("");
     setImagePreview(null);
@@ -1480,7 +1547,7 @@ const handleBackgroundPublish = async (e) => {
                   <span>Reset</span>
                 </button>
                 <div className="flex space-x-2">
-                <button
+                  <button
                     type="button"
                     disabled={isLoading}
                     onClick={(e) => handleSubmit(e, "DRAFT")}
@@ -1504,9 +1571,25 @@ const handleBackgroundPublish = async (e) => {
                       className="px-8 py-3 bg-gradient-to-r from-gray-600 to-gray-500 text-white rounded-lg text-sm font-semibold hover:from-gray-500 hover:to-gray-400 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all shadow-lg"
                     >
                       {isLoading ? (
-                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        <svg
+                          className="animate-spin h-5 w-5 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          />
                         </svg>
                       ) : (
                         <>
@@ -1526,9 +1609,25 @@ const handleBackgroundPublish = async (e) => {
                       className="px-8 py-3 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-lg text-sm font-semibold hover:from-gray-800 hover:to-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all shadow-lg"
                     >
                       {isLoading ? (
-                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        <svg
+                          className="animate-spin h-5 w-5 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          />
                         </svg>
                       ) : (
                         <>
@@ -1548,9 +1647,25 @@ const handleBackgroundPublish = async (e) => {
                       className="px-8 py-3 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-lg text-sm font-semibold hover:from-gray-800 hover:to-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all shadow-lg"
                     >
                       {isLoading ? (
-                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        <svg
+                          className="animate-spin h-5 w-5 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          />
                         </svg>
                       ) : (
                         <>
@@ -1568,67 +1683,66 @@ const handleBackgroundPublish = async (e) => {
           <form onSubmit={(e) => e.preventDefault()} className="p-8 space-y-8">
             {/* Basic Info */}
             <section className="space-y-5">
-            {!distId && (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* LEFT SIDE: portal Selection */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Portal
-                  </label>
+              {!distId && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* LEFT SIDE: portal Selection */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Portal
+                    </label>
 
-                  {isCategoryloading ? (
-                    // 🔹 Loading state
-                    <input
-                      disabled
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm bg-gray-100"
-                      value="Loading portals..."
-                    />
-                  ) : assignedCategories.length === 0 ? (
-                    // 🔹 NO PORTAL FOUND → Show message in input box
-                    <input
-                      disabled
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm bg-white text-gray-500"
-                      value="No portal found"
-                    />
-                  ) : assignedCategories.length === 1 ? (
-                    // 🔹 ONLY ONE PORTAL → Show readonly input with auto-selected portal
-                    <input
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm bg-gray-50"
-                      value={assignedCategories[0].name}
-                      readOnly
-                    />
-                  ) : (
-                    // 🔹 MULTIPLE PORTALS → Dropdown with default selected
-                    <select
-                      name="master_category"
-                      value={
-                        formData.master_category || assignedCategories[0]?.id
-                      }
-                      onChange={(e) => {
-                        setFormData((prev) => ({
-                          ...prev,
-                          master_category: e.target.value,
-                        }));
-                        handleCategorySelect(e);
-                      }}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
-                    >
-                      {/* Default portal auto selected */}
-                      {assignedCategories.map((portal) => (
-                        <option key={portal.id} value={portal.id}>
-                          {portal.name}
-                        </option>
-                      ))}
-                    </select>
-                  )}
+                    {isCategoryloading ? (
+                      // 🔹 Loading state
+                      <input
+                        disabled
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm bg-gray-100"
+                        value="Loading portals..."
+                      />
+                    ) : assignedCategories.length === 0 ? (
+                      // 🔹 NO PORTAL FOUND → Show message in input box
+                      <input
+                        disabled
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm bg-white text-gray-500"
+                        value="No portal found"
+                      />
+                    ) : assignedCategories.length === 1 ? (
+                      // 🔹 ONLY ONE PORTAL → Show readonly input with auto-selected portal
+                      <input
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm bg-gray-50"
+                        value={assignedCategories[0].name}
+                        readOnly
+                      />
+                    ) : (
+                      // 🔹 MULTIPLE PORTALS → Dropdown with default selected
+                      <select
+                        name="master_category"
+                        value={
+                          formData.master_category || assignedCategories[0]?.id
+                        }
+                        onChange={(e) => {
+                          setFormData((prev) => ({
+                            ...prev,
+                            master_category: e.target.value,
+                          }));
+                          handleCategorySelect(e);
+                        }}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
+                      >
+                        {/* Default portal auto selected */}
+                        {assignedCategories.map((portal) => (
+                          <option key={portal.id} value={portal.id}>
+                            {portal.name}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
                 </div>
-              </div>
-             )}
+              )}
               {showPortalSection && !distId && (
                 <section className="space-y-5 mt-2 border-2 p-2 border-gray-200 rounded relative">
                   {/* Header Section */}
                   <div className="relative flex items-center justify-between items-center pb-3 border-b-2 border-gray-200">
-
                     {/* LEFT: Icon + Title + Back Button */}
                     <div className="flex items-center space-x-3">
                       {/* Settings Icon */}
@@ -1637,67 +1751,68 @@ const handleBackgroundPublish = async (e) => {
                       </div>
 
                       {/* Title */}
-                    <h2 className="text-lg font-semibold text-gray-900">
-                         {mappedPortals?.length > 0 && mappedPortals[0]?.mapping_found
-                              ? "Select matched portal"
-                              : categoryHistory.length > 0
-                              ? "Select subcategory"
-                              : "Select category"}
-                          {" "}
-                          from{" "}
-                          <span className="font-bold">
-                            {
-                              assignedCategories.find(
-                                (p) => p.id === Number(formData.master_category)
-                              )?.name || "Selected"
-                            }
-                          </span>
-                        </h2>
+                      <h2 className="text-lg font-semibold text-gray-900">
+                        {mappedPortals?.length > 0 &&
+                        mappedPortals[0]?.mapping_found
+                          ? "Select matched portal"
+                          : categoryHistory.length > 0
+                            ? "Select subcategory"
+                            : "Select category"}{" "}
+                        from{" "}
+                        <span className="font-bold">
+                          {assignedCategories.find(
+                            (p) => p.id === Number(formData.master_category),
+                          )?.name || "Selected"}
+                        </span>
+                      </h2>
                     </div>
 
-                   <div className="flex items-center gap-3">
-                        {/* Manage Button */}
-                        {!showPortalCategoryModal &&
-                          formData.master_category &&
-                          categoryHistory.length > 0 &&
-                          !mappedPortals[0]?.has_subcategories && (
-                            <button
-                              type="button"
-                              className="px-3 py-2 bg-blue-600 text-white rounded-md text-xs hover:bg-blue-700"
-                              onClick={() => {
-                                setForceEnablePortal(true);
-                                setShowPortalCategoryModal(true);
-                              }}
-                            >
-                              Manage Portal Categories
-                            </button>
-                          )}
-
-                        {/* Back Button */}
-                        {categoryHistory.length > 0 && (
+                    <div className="flex items-center gap-3">
+                      {/* Manage Button */}
+                      {!showPortalCategoryModal &&
+                        formData.master_category &&
+                        categoryHistory.length > 0 &&
+                        !mappedPortals[0]?.has_subcategories && (
                           <button
                             type="button"
-                            onClick={() => handleGoBack(resetPortalImages)}
-                            className="flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-medium transition-all"
+                            className="px-3 py-2 bg-blue-600 text-white rounded-md text-xs hover:bg-blue-700"
+                            onClick={() => {
+                              setForceEnablePortal(true);
+                              setShowPortalCategoryModal(true);
+                            }}
                           >
-                            <svg
-                              className="w-4 h-4"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                            </svg>
-                            Back
+                            Manage Portal Categories
                           </button>
                         )}
-                      </div>
 
+                      {/* Back Button */}
+                      {categoryHistory.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => handleGoBack(resetPortalImages)}
+                          className="flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-medium transition-all"
+                        >
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15 19l-7-7 7-7"
+                            />
+                          </svg>
+                          Back
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   {/* Portal list */}
-                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
                     {isPortalsLoading ? (
                       <p className="text-center col-span-full py-5 text-gray-600">
                         Loading...
@@ -1717,28 +1832,29 @@ const handleBackgroundPublish = async (e) => {
                           return (
                             <div
                               key={i}
-                             onClick={(e) => {
-                                      // 🔒 Requested portal → DO NOTHING
-                                      if (portal.is_requested) {
-                                        e.stopPropagation();
-                                        return;
-                                      }
+                              onClick={(e) => {
+                                // 🔒 Requested portal → DO NOTHING
+                                if (portal.is_requested) {
+                                  e.stopPropagation();
+                                  return;
+                                }
 
-                                      // ✅ Only mapped portals can toggle
-                                      if (portal.mapping_found) {
-                                        e.stopPropagation();
-                                        setMappedPortals((prev) =>
-                                          prev.map((p) =>
-                                            p.id === portal.id ? { ...p, selected: !p.selected } : p
-                                          )
-                                        );
-                                        return;
-                                      }
+                                // ✅ Only mapped portals can toggle
+                                if (portal.mapping_found) {
+                                  e.stopPropagation();
+                                  setMappedPortals((prev) =>
+                                    prev.map((p) =>
+                                      p.id === portal.id
+                                        ? { ...p, selected: !p.selected }
+                                        : p,
+                                    ),
+                                  );
+                                  return;
+                                }
 
-                                      // ✅ Normal flow (subcategory / API)
-                                      handlePortalCategoryClick(portal);
-                                    }}
-
+                                // ✅ Normal flow (subcategory / API)
+                                handlePortalCategoryClick(portal);
+                              }}
                               className={`relative flex items-center space-x-3 border-2 p-4 rounded-xl cursor-pointer transition-all ${
                                 portal.selected
                                   ? "bg-gray-900 border-gray-900 text-white shadow-lg"
@@ -1758,8 +1874,8 @@ const handleBackgroundPublish = async (e) => {
                                               portal.portalName &&
                                             p.portalCategoryId ===
                                               portal.portalCategoryId
-                                          )
-                                      )
+                                          ),
+                                      ),
                                     );
                                   }}
                                   className="absolute top-2 right-2 p-1 bg-white text-white rounded-full transition-all z-10"
@@ -1772,22 +1888,29 @@ const handleBackgroundPublish = async (e) => {
                                 {portal.mapping_found ? (
                                   <>
                                     {/* Checkbox Section */}
-                                  <div className="absolute top-3 left-3">
+                                    <div className="absolute top-3 left-3">
                                       <input
                                         type="checkbox"
                                         checked={portal.selected}
-                                        disabled={portal.is_requested}   // 🔒 disable click
+                                        disabled={portal.is_requested} // 🔒 disable click
                                         onChange={() => {
                                           if (portal.is_requested) return;
 
                                           setMappedPortals((prev) =>
                                             prev.map((p, idx) =>
-                                              idx === i ? { ...p, selected: !p.selected } : p
-                                            )
+                                              idx === i
+                                                ? {
+                                                    ...p,
+                                                    selected: !p.selected,
+                                                  }
+                                                : p,
+                                            ),
                                           );
                                         }}
                                         className={`w-5 h-5 accent-gray-900 ${
-                                          portal.is_requested ? "cursor-not-allowed opacity-80" : ""
+                                          portal.is_requested
+                                            ? "cursor-not-allowed opacity-80"
+                                            : ""
                                         }`}
                                       />
                                     </div>
@@ -1872,8 +1995,8 @@ const handleBackgroundPublish = async (e) => {
                       {!selectedPortalForCategories
                         ? "Select Portal"
                         : isSubcategoryView
-                        ? "Select Subcategory"
-                        : "Select Category"}
+                          ? "Select Subcategory"
+                          : "Select Category"}
                     </h3>
 
                     {/* Portal selector */}
@@ -1908,7 +2031,7 @@ const handleBackgroundPublish = async (e) => {
                           // Reload parent categories
                           const res = await fetchPortalParentCategories(
                             selectedPortalForCategories,
-                            1
+                            1,
                           );
                           const categories =
                             res?.data?.data?.parent_categories || [];
@@ -1937,7 +2060,7 @@ const handleBackgroundPublish = async (e) => {
                                   const subCatRes =
                                     await fetchSubCategoriesByParent(
                                       selectedPortalForCategories,
-                                      cat.parent_external_id
+                                      cat.parent_external_id,
                                     );
                                   const subcats =
                                     subCatRes?.data?.data?.categories || [];
@@ -1952,7 +2075,7 @@ const handleBackgroundPublish = async (e) => {
                                 } catch (err) {
                                   console.error(
                                     "Error fetching subcategories:",
-                                    err
+                                    err,
                                   );
                                   toast.error("Failed to load subcategories");
                                 }
@@ -1969,21 +2092,24 @@ const handleBackgroundPublish = async (e) => {
                             >
                               {isSubcategoryView && (
                                 <input
-                      type="checkbox"
-                      checked={cat.selected || false}
-                      onChange={(e) => {
-                        e.stopPropagation();
-                        const isChecked = e.target.checked;
-                        // Single select: uncheck all others when checking one
-                        setPortalCategoriesModal((prev) =>
-                          prev.map((c) => ({
-                            ...c,
-                            selected: c.external_id === cat.external_id ? isChecked : false
-                          }))
-                        );
-                      }}
-                      className="w-5 h-5 accent-gray-900"
-                    />
+                                  type="checkbox"
+                                  checked={cat.selected || false}
+                                  onChange={(e) => {
+                                    e.stopPropagation();
+                                    const isChecked = e.target.checked;
+                                    // Single select: uncheck all others when checking one
+                                    setPortalCategoriesModal((prev) =>
+                                      prev.map((c) => ({
+                                        ...c,
+                                        selected:
+                                          c.external_id === cat.external_id
+                                            ? isChecked
+                                            : false,
+                                      })),
+                                    );
+                                  }}
+                                  className="w-5 h-5 accent-gray-900"
+                                />
                               )}
                               <span className="flex-1">
                                 <span className="flex-1">
@@ -2012,11 +2138,11 @@ const handleBackgroundPublish = async (e) => {
                           className="px-5 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-all shadow-md"
                           onClick={() => {
                             const selectedCats = portalCategoriesModal.filter(
-                              (c) => c.selected
+                              (c) => c.selected,
                             );
                             if (selectedCats.length === 0) {
                               toast.warning(
-                                "Please select at least one subcategory."
+                                "Please select at least one subcategory.",
                               );
                               return;
                             }
@@ -2024,22 +2150,24 @@ const handleBackgroundPublish = async (e) => {
                             // ✅ Get the actual portal name from portalList
                             const selectedPortalData = portalList.find(
                               (p) =>
-                                p.id === Number(selectedPortalForCategories)
+                                p.id === Number(selectedPortalForCategories),
                             );
                             const actualPortalName =
                               selectedPortalData?.name || "Unknown Portal";
 
                             setMappedPortals((prev) => {
-                                    const updated = [...prev];
-                                    selectedCats.forEach((cat) => {
-                                      const exists = updated.some(
-                                        (p) =>
-                                          p.portalName === actualPortalName &&
-                                          p.id === cat.id  // ✅ NOW CHECK BY cat.id
-                                      );
-                                      if (!exists) {
-                                        console.log(`✅ Adding subcategory: ${cat.name}, ID: ${cat.id}, external_id: ${cat.external_id}`);
-                                       updated.push({
+                              const updated = [...prev];
+                              selectedCats.forEach((cat) => {
+                                const exists = updated.some(
+                                  (p) =>
+                                    p.portalName === actualPortalName &&
+                                    p.id === cat.id, // ✅ NOW CHECK BY cat.id
+                                );
+                                if (!exists) {
+                                  console.log(
+                                    `✅ Adding subcategory: ${cat.name}, ID: ${cat.id}, external_id: ${cat.external_id}`,
+                                  );
+                                  updated.push({
                                     id: cat.id, // use ONLY integer timestamp
                                     portalId: 0, // mark manually added category
                                     portalName: actualPortalName,
@@ -2049,15 +2177,15 @@ const handleBackgroundPublish = async (e) => {
                                     selected: true,
                                     is_manually_added: true, // ✅ IMPORTANT FIX
                                   });
-                                      }
-                                    });
-                                    return updated;
-                                  });
+                                }
+                              });
+                              return updated;
+                            });
 
                             toast.success(
                               `${selectedCats.length} subcategor${
                                 selectedCats.length > 1 ? "ies" : "y"
-                              } added`
+                              } added`,
                             );
 
                             // 🔥 RESET MODAL DATA
@@ -2173,7 +2301,6 @@ const handleBackgroundPublish = async (e) => {
                       document.body.setAttribute("contenteditable", "false");
                       document.body.style.caretColor = "transparent";
                     }}
-
                     config={{
                       height: 400,
                       versionCheck: false,
@@ -2461,133 +2588,144 @@ const handleBackgroundPublish = async (e) => {
                 </div>
               )}
             </section>
-            
+
             {showPortalSection && mappedPortals.length > 0 && !distId && (
-  <section className="space-y-5">
-    <div className="flex items-center justify-between pb-3 border-b-2 border-gray-200">
-      <div className="flex items-center space-x-2">
-        <div className="p-2 bg-gray-100 rounded-lg">
-          <ImageIcon className="w-5 h-5 text-gray-700" />
-        </div>
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900">
-            Portal-Specific Images
-          </h2>
-          <p className="text-xs text-gray-500 mt-0.5">
-            Upload custom images for each portal (optional)
-          </p>
-        </div>
-      </div>
-      <button
-        type="button"
-        disabled={!isCrossMappingChecked || isPublished}
-        onClick={() => setShowPortalImageUpload(prev => !prev)}
-        className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-all
-          ${isCrossMappingChecked && !isPublished
-            ? "bg-gray-900 text-white hover:bg-gray-800"
-            : "bg-gray-300 text-gray-500 cursor-not-allowed"}
-        `}
-      >
-
-      {showPortalImageUpload ? (
-        <>
-          <Eye className="w-4 h-4" />
-          Hide
-        </>
-      ) : (
-        <>
-          <Upload className="w-4 h-4" />
-          Upload Images
-        </>
-      )}
-    </button>
-
-
-    </div>
-
-      {showPortalImageUpload && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {mappedPortals
-            .filter(portal => portal.selected && (portal.portalId || portal.is_manually_added))
-            .map((portal, idx) => (
-              <div
-                key={idx}
-                className="border-2 border-gray-200 rounded-xl p-4 bg-white hover:shadow-md transition-all"
-              >
-                <div className="mb-3">
-                  <h3 className="font-semibold text-gray-900 text-sm">
-                    {portal.portalName}
-                  </h3>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    {portal.portalCategoryName}
-                  </p>
-                </div>
-
-                {portalImagePreviews[portal.portalId] ? (
-                  <div className="relative group">
-                    <div className="aspect-video rounded-lg overflow-hidden border border-gray-200">
-                      <img
-                        src={portalImagePreviews[portal.portalId]}
-                        alt={`${portal.portalName} preview`}
-                        className="w-full h-full object-cover"
-                      />
+              <section className="space-y-5">
+                <div className="flex items-center justify-between pb-3 border-b-2 border-gray-200">
+                  <div className="flex items-center space-x-2">
+                    <div className="p-2 bg-gray-100 rounded-lg">
+                      <ImageIcon className="w-5 h-5 text-gray-700" />
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => removePortalImage(portal.portalId)}
-                      className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-red-600"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                    <div className="mt-2 text-xs text-gray-600 flex items-center gap-1">
-                      <ImageIcon className="w-3 h-3" />
-                      {portalImages[portal.portalId]?.name}
+                    <div>
+                      <h2 className="text-lg font-semibold text-gray-900">
+                        Portal-Specific Images
+                      </h2>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Upload custom images for each portal (optional)
+                      </p>
                     </div>
                   </div>
-                ) : (
-                  <label className="block cursor-pointer">
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-all">
-                      <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                      <p className="text-xs text-gray-600 font-medium">
-                        Click to upload
+                  <button
+                    type="button"
+                    disabled={!isCrossMappingChecked || isPublished}
+                    onClick={() => setShowPortalImageUpload((prev) => !prev)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-all
+          ${
+            isCrossMappingChecked && !isPublished
+              ? "bg-gray-900 text-white hover:bg-gray-800"
+              : "bg-gray-300 text-gray-500 cursor-not-allowed"
+          }
+        `}
+                  >
+                    {showPortalImageUpload ? (
+                      <>
+                        <Eye className="w-4 h-4" />
+                        Hide
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-4 h-4" />
+                        Upload Images
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {showPortalImageUpload && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {mappedPortals
+                      .filter(
+                        (portal) =>
+                          portal.selected &&
+                          (portal.portalId || portal.is_manually_added),
+                      )
+                      .map((portal, idx) => (
+                        <div
+                          key={idx}
+                          className="border-2 border-gray-200 rounded-xl p-4 bg-white hover:shadow-md transition-all"
+                        >
+                          <div className="mb-3">
+                            <h3 className="font-semibold text-gray-900 text-sm">
+                              {portal.portalName}
+                            </h3>
+                            <p className="text-xs text-gray-500 mt-0.5">
+                              {portal.portalCategoryName}
+                            </p>
+                          </div>
+
+                          {portalImagePreviews[portal.portalId] ? (
+                            <div className="relative group">
+                              <div className="aspect-video rounded-lg overflow-hidden border border-gray-200">
+                                <img
+                                  src={portalImagePreviews[portal.portalId]}
+                                  alt={`${portal.portalName} preview`}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  removePortalImage(portal.portalId)
+                                }
+                                className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-red-600"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                              <div className="mt-2 text-xs text-gray-600 flex items-center gap-1">
+                                <ImageIcon className="w-3 h-3" />
+                                {portalImages[portal.portalId]?.name}
+                              </div>
+                            </div>
+                          ) : (
+                            <label className="block cursor-pointer">
+                              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-all">
+                                <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                                <p className="text-xs text-gray-600 font-medium">
+                                  Click to upload
+                                </p>
+                                <p className="text-xs text-gray-400 mt-1">
+                                  PNG, JPG up to 10MB
+                                </p>
+                              </div>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) =>
+                                  handlePortalImageUpload(
+                                    portal.portalId,
+                                    e.target.files[0],
+                                  )
+                                }
+                                className="hidden"
+                              />
+                            </label>
+                          )}
+                        </div>
+                      ))}
+                  </div>
+                )}
+
+                {Object.keys(portalImages).length > 0 && (
+                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-blue-900">
+                        {Object.keys(portalImages).length} portal image
+                        {Object.keys(portalImages).length > 1 ? "s" : ""} ready
+                        to upload
                       </p>
-                      <p className="text-xs text-gray-400 mt-1">
-                        PNG, JPG up to 10MB
+                      <p className="text-xs text-blue-700 mt-1">
+                        These images will be uploaded automatically after
+                        publishing the article
                       </p>
                     </div>
-                    <input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) =>
-                            handlePortalImageUpload(portal.portalId, e.target.files[0])
-                          }
-                          className="hidden"
-                        />
-                  </label>
+                  </div>
                 )}
-              </div>
-            ))}
-        </div>
-      )}
-
-            {Object.keys(portalImages).length > 0 && (
-              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-blue-900">
-                    {Object.keys(portalImages).length} portal image{Object.keys(portalImages).length > 1 ? 's' : ''} ready to upload
-                  </p>
-                  <p className="text-xs text-blue-700 mt-1">
-                    These images will be uploaded automatically after publishing the article
-                  </p>
-                </div>
-              </div>
+              </section>
             )}
-          </section>
-        )}
             <section className="space-y-5">
-               {/* Portal-Specific Images Section */}
-        
+              {/* Portal-Specific Images Section */}
+
               {/* Header */}
               <div className="flex items-center space-x-2 pb-3 border-b-2 border-gray-200">
                 <div className="p-2 bg-gray-100 rounded-lg">
@@ -2670,7 +2808,7 @@ const handleBackgroundPublish = async (e) => {
                                 // Keep focus on input after selection
                                 setTimeout(
                                   () => tagInputRef.current?.focus(),
-                                  0
+                                  0,
                                 ); // ← THIS LINE HERE
                               }}
                               className="px-4 py-3 hover:bg-gray-100 cursor-pointer transition-all border-b border-gray-100 last:border-b-0"
@@ -2880,92 +3018,144 @@ const handleBackgroundPublish = async (e) => {
 
             {/* Submit Actions - Updated button text */}
             <div className="flex justify-end space-x-3 pt-6 border-t-2 border-gray-200">
-  <button
-    type="button"
-    onClick={resetForm}
-    className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-all"
-  >
-    Reset Form
-  </button>
+              <button
+                type="button"
+                onClick={resetForm}
+                className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-all"
+              >
+                Reset Form
+              </button>
 
-  {!isDistributedEdit && (
-    <button
-      type="button"
-      disabled={isLoading}
-      onClick={(e) => handleSubmit(e, "DRAFT")}
-      className="px-8 py-3 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-lg text-xs font-semibold hover:from-gray-600 hover:to-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all shadow-lg"
-    >
-      <SaveAll className="w-4 h-4 mr-2" />
-      Save as Draft
-    </button>
-  )}
+              {!isDistributedEdit && (
+                <button
+                  type="button"
+                  disabled={isLoading}
+                  onClick={(e) => handleSubmit(e, "DRAFT")}
+                  className="px-8 py-3 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-lg text-xs font-semibold hover:from-gray-600 hover:to-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all shadow-lg"
+                >
+                  <SaveAll className="w-4 h-4 mr-2" />
+                  Save as Draft
+                </button>
+              )}
 
-  {/* Publish Article (normal) */}
-  {!isDistributedEdit && (
-    <button
-      type="button"
-      disabled={isLoading}
-      onClick={(e) => handleSubmit(e, "PUBLISHED")}
-      className="px-8 py-3 bg-gradient-to-r from-gray-600 to-gray-500 text-white rounded-lg text-sm font-semibold hover:from-gray-500 hover:to-gray-400 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all shadow-lg"
-    >
-      {isLoading ? (
-        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-        </svg>
-      ) : (
-        <>
-          <Save className="w-5 h-5 mr-2" />
-          Publish Article
-        </>
-      )}
-    </button>
-  )}
+              {/* Publish Article (normal) */}
+              {!isDistributedEdit && (
+                <button
+                  type="button"
+                  disabled={isLoading}
+                   onClick={(e) => {
+                        e.preventDefault();
+                        // Only show warning if status is PUBLISHED
+                        setShowPublishWarning(true);
+                      }}
+                  className="px-8 py-3 bg-gradient-to-r from-gray-600 to-gray-500 text-white rounded-lg text-sm font-semibold hover:from-gray-500 hover:to-gray-400 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all shadow-lg"
+                >
+                  {isLoading ? (
+                    <svg
+                      className="animate-spin h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
+                    </svg>
+                  ) : (
+                    <>
+                      <Save className="w-5 h-5 mr-2" />
+                      Publish Article
+                    </>
+                  )}
+                </button>
+              )}
 
-  {/* Background Publish (primary CTA) */}
-  {!isDistributedEdit && (
-    <button
-      type="button"
-      disabled={isLoading}
-      onClick={handleBackgroundPublish}
-      className="px-8 py-3 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-lg text-sm font-semibold hover:from-gray-800 hover:to-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all shadow-lg"
-    >
-      {isLoading ? (
-        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-        </svg>
-      ) : (
-        <>
-          <RefreshCw className="w-5 h-5 mr-2" />
-          Background Publish
-        </>
-      )}
-    </button>
-  )}
+              {/* Background Publish (primary CTA) */}
+              {!isDistributedEdit && (
+                <button
+                  type="button"
+                  disabled={isLoading}
+                  onClick={handleBackgroundPublish}
+                  className="px-8 py-3 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-lg text-sm font-semibold hover:from-gray-800 hover:to-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all shadow-lg"
+                >
+                  {isLoading ? (
+                    <svg
+                      className="animate-spin h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
+                    </svg>
+                  ) : (
+                    <>
+                      <RefreshCw className="w-5 h-5 mr-2" />
+                      Background Publish
+                    </>
+                  )}
+                </button>
+              )}
 
-  {/* Distributed edit */}
-  {isDistributedEdit && (
-    <button
-      type="button"
-      disabled={isLoading}
-      onClick={(e) => handleSubmit(e, "PUBLISHED")}
-      className="px-8 py-3 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-lg text-sm font-semibold hover:from-gray-800 hover:to-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all shadow-lg"
-    >
-      {isLoading ? (
-        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-        </svg>
-      ) : (
-        <>
-          <Save className="w-5 h-5 mr-2" />
-          Update & Publish
-        </>
-      )}
-    </button>
-  )}
-</div>
+              {/* Distributed edit */}
+              {isDistributedEdit && (
+                <button
+                  type="button"
+                  disabled={isLoading}
+                  onClick={(e) => handleSubmit(e, "PUBLISHED")}
+                  className="px-8 py-3 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-lg text-sm font-semibold hover:from-gray-800 hover:to-gray-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all shadow-lg"
+                >
+                  {isLoading ? (
+                    <svg
+                      className="animate-spin h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
+                    </svg>
+                  ) : (
+                    <>
+                      <Save className="w-5 h-5 mr-2" />
+                      Update & Publish
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
           </form>
         </div>
       </div>
@@ -3014,17 +3204,29 @@ const handleBackgroundPublish = async (e) => {
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
           <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl border border-gray-100">
             <div className="flex items-center justify-center mb-4 text-amber-500">
-              <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              <svg
+                className="w-12 h-12"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
               </svg>
             </div>
-            
+
             <h3 className="text-lg font-bold text-gray-900 text-center mb-2">
               Not Recommended Method
             </h3>
-            
+
             <p className="text-gray-600 text-center text-sm mb-6">
-              This is not the recommended way to publish news. Use <strong>New Background Publish</strong> to publish news. Use this way only when background publish news is not working.
+              This is not the recommended way to publish news. Use{" "}
+              <strong>New Background Publish</strong> to publish news. Use this
+              way only when background publish news is not working.
             </p>
 
             <div className="flex flex-col gap-3">
@@ -3038,7 +3240,7 @@ const handleBackgroundPublish = async (e) => {
               >
                 Publish Anyway with this method
               </button>
-              
+
               {/* LIGHT GREEN BUTTON: SAFE ACTION */}
               <button
                 onClick={() => setShowPublishWarning(false)}
