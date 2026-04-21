@@ -35,6 +35,7 @@ const NewsList = () => {
   const [status, setStatus] = useState("");
   const [createdBy, setCreatedBy] = useState("");
   const [username, setUsername] = useState("");
+  const [userId, setUserId] = useState("");
   const [dateFilter, setDateFilter] = useState("today");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -235,6 +236,7 @@ const [loadingDistributed, setLoadingDistributed] = useState({});
         master_category: filters.master_category_id || "",
         created_by: filters.username || "",
         username: filters.username || "",
+        user_id: filters.user_id || userId || "",
         date_filter, // ✅ fixed
         start_date,
         end_date,
@@ -339,6 +341,7 @@ const handleDeleteDistributedNews = async (distId, newsPostId) => {
       portal_id: selectedPortal,
       master_category_id: selectedMasterCategory,
       username: createdBy,
+      user_id: userId,
       date_filter: dateFilter,
       start_date: startDate,
       end_date: endDate,
@@ -436,6 +439,7 @@ const handleDeleteDistributedNews = async (distId, newsPostId) => {
                 setSelectedMasterCategory(filters.master_category_id || "");
                 setCreatedBy(filters.username || "");
                 setUsername(filters.username || "");
+                setUserId(filters.user_id || "");
                if (filters.date_filter === "All") {
                   setDateFilter("All");
                   const today = new Date().toISOString().split('T')[0];
