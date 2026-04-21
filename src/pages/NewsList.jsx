@@ -641,32 +641,56 @@ const handleDeleteDistributedNews = async (distId, newsPostId) => {
                                 <span>Publishing...</span>
                               </div>
                             ) : (
-                              <div className="flex items-center justify-center gap-3">
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (!publishingId) {
-                                      setPendingRetryItem(item); // Save the item to retry later
-                                      setShowRetryWarning(true);  // Open the modal
-                                    }
-                                  }}
-                                  className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-                                  title="Retry Publish (normal)"
-                                >
-                                  Retry
-                                </button>
-                                <span className="text-gray-300">|</span>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (!publishingId) handleBackgroundRetry(item);
-                                  }}
-                                  className="text-sm text-emerald-600 hover:text-emerald-800 font-medium"
-                                  title="Retry Publish in Background"
-                                >
-                                  BG Retry
-                                </button>
-                              </div>
+                            <div className="flex items-center justify-center gap-2">
+
+                              {/* Retry */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (!publishingId) {
+                                    setPendingRetryItem(item);
+                                    setShowRetryWarning(true);
+                                  }
+                                }}
+                                className="
+                                  text-sm font-medium
+                                  text-blue-600
+                                  bg-blue-50
+                                  hover:bg-blue-100
+                                  border border-blue-100
+                                  px-3 py-1.5
+                                  rounded-full
+                                  transition-all
+                                  duration-150
+                                "
+                                title="Retry Publish (normal)"
+                              >
+                                Retry
+                              </button>
+
+                              {/* BG Retry */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (!publishingId) handleBackgroundRetry(item);
+                                }}
+                                className="
+                                  text-sm font-medium
+                                  text-emerald-600
+                                  bg-emerald-50
+                                  hover:bg-emerald-100
+                                  border border-emerald-100
+                                  px-3 py-1.5
+                                  rounded-full
+                                  transition-all
+                                  duration-150
+                                "
+                                title="Retry Publish in Background"
+                              >
+                                BG Retry
+                              </button>
+
+                            </div>
                             )}
                           </td>
                         </tr>
