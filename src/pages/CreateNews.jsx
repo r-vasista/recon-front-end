@@ -476,14 +476,20 @@ const NewsArticleForm = () => {
   const handleViewDrafts = async () => {
     try {
       const res = await fetchDraftNews();
-      if (res.data?.status && Array.isArray(res.data.data)) {
-        setDrafts(res.data.data);
-        setShowDrafts(!showDrafts);
+      
+      const draftsArray = res.data?.data?.results;
+
+      if (res.data?.status && Array.isArray(draftsArray)) {
+        
+        setDrafts(draftsArray); 
+        setShowDrafts((prev) => !prev); 
+      } else {
+        console.error("Data format incorrect. Expected 'results' array.");
       }
     } catch (err) {
       console.error("Error fetching drafts:", err);
     }
-  };
+  }
 
   const handleSelectDraft = async (draft) => {
     setFormData({
